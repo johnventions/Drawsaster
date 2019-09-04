@@ -1,0 +1,17 @@
+<main class='lobby container'>
+    <h1>Waiting to begin</h1>
+    <p>
+        Game Code: {{ status().code }}
+        <template v-if="players().length > 1">
+            <br/>{{ players().length }} Players
+            <div v-for="player in players()">
+                {{ player.name }}
+            </div>
+        </template>
+    </p>
+    <button class='btn btn-primary' 
+            v-if="displayStart()" 
+            v-on:click="startGame()">
+        Start
+    </button>
+</main>

@@ -1,0 +1,43 @@
+input
+    padding 5px 10px
+    text-align center
+body
+    background linear-gradient(170deg, #3224af, #b149c4)
+    min-height 100vh
+    color white
+    font-family 'Cabin', sans-serif
+    font-size 24px
+    
+
+.btn
+    width 100%
+    @media $tablet-up
+        width auto
+
+p + button
+    margin-top 15px
+
+main
+    padding-top 20px
+
+.btn
+        margin 22px auto 15px
+        padding 12px 10px
+        font-size 24px
+        width 90%
+        border 2px solid white
+        background #7ed321
+        text-align center
+        border-radius 6px
+        text-transform uppercase
+        display block
+    &.btn-primary
+        &:disabled
+            background grey
+            border-color white
+
+h1
+    font-family 'Amatic SC', sans-serif
+    font-size 68px
+    color white
+    font-weight 700

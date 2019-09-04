@@ -1,0 +1,16 @@
+<main class='join container'>
+    <h1>Join</h1>
+    <label>
+        Your Name:
+    </label>
+    <input name="user" v-model="user"></input>
+    <label>
+        Game Code:
+    </label>
+    <input name="code" class="code" v-model="code"></input>
+    <button class='btn btn-primary col-12 mt-3'
+        v-bind:disabled="pending"
+        v-on:click="join">
+        Join
+    </button>
+</main>

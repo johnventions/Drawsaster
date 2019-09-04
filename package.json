@@ -1,0 +1,40 @@
+{
+  "name": "vue-socket-game",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "vue-cli-service build && node ./server.js",
+    "build": "vue-cli-service build",
+    "lint": "vue-cli-service lint",
+    "dev": "vue-cli-service serve | nodemon ./server.js"
+  },
+  "dependencies": {
+    "axios": "^0.19.0",
+    "connect-mongo": "^3.0.0",
+    "cookie-parser": "^1.4.4",
+    "core-js": "^2.6.5",
+    "express-session": "^1.16.2",
+    "language-stylus": "^3.2.0",
+    "mongoose": "^5.6.4",
+    "nodemon": "^1.19.1",
+    "socket.io": "^2.2.0",
+    "socket.io-client": "^2.2.0",
+    "vue": "^2.6.10",
+    "vue-router": "^3.0.3",
+    "vue-socket.io": "^3.0.7",
+    "vuex": "^3.1.1"
+  },
+  "devDependencies": {
+    "@vue/cli-plugin-babel": "^3.9.0",
+    "@vue/cli-plugin-eslint": "^3.9.0",
+    "@vue/cli-service": "^3.9.0",
+    "babel-eslint": "^10.0.1",
+    "eslint": "^5.16.0",
+    "eslint-plugin-vue": "^5.0.0",
+    "style-resources-loader": "^1.2.1",
+    "stylus": "^0.54.5",
+    "stylus-loader": "^3.0.2",
+    "vue-cli-plugin-style-resources-loader": "^0.1.3",
+    "vue-template-compiler": "^2.6.10"
+  }
+}

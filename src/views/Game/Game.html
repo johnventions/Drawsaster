@@ -1,0 +1,15 @@
+<main class='game container'>
+    <h1>Game</h1>
+    <template v-if="currentTask != null">
+        <h3 v-if="currentTask.type == 'start'">Write Any Phrase</h3>
+        <h3 v-if="currentTask.type == 'drawing'">Draw This</h3>
+        <h3 v-if="currentTask.type == 'caption'">Caption This</h3>
+        <input v-model="caption" v-if="currentTask.type != 'drawing'">
+        <button class='btn btn-primary' v-on:click="submit()">
+            Submit
+        </button>
+    </template>
+    <template v-else>
+
+    </template>
+</main>
