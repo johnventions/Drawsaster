@@ -13,6 +13,7 @@ export default new Vuex.Store({
 		admin: 0,
 		gameID: null,
 		started: false,
+		nextPlayer: null,
 		players: [],
 		queue: [],
 		mySubmissions: []
@@ -23,6 +24,7 @@ export default new Vuex.Store({
 			this.commit('SET_LOGIN', payload.player);
 			this.commit('SET_GAME', payload.game);
 			this.commit('SET_PLAYERS', payload.players)
+			this.commit('SET_QUEUE', payload.tasks)
 		},
 		SET_LOGIN(state, player) {
 			state.loggedIn = 1;
@@ -36,14 +38,37 @@ export default new Vuex.Store({
 			state.code = game.code;
 		},
 		SET_PLAYERS(state, players) {
-			state.players = players;
+			state.players = players.sort( function(a, b) {
+				return a.playOrder > b.playOrder ? 1 : -1;
+			});
+			console.log(players);
+			var curPlayer = state.userID;
+			var i = state.players.findIndex( p => {
+				return p._id == curPlayer;
+			});
+			if (i == state.players.length - 1) {
+				this.commit("SET_NEXT_PLAYER", players[0]._id);
+			} else {
+				this.commit("SET_NEXT_PLAYER", players[ i + 1 ]._id);
+			}
+		},
+		SET_NEXT_PLAYER(state, playerID) {
+			state.nextPlayer = playerID;
+		},
+		SET_QUEUE(state, tasks) {
+			state.queue = tasks;
 		},
 		ADD_TASK(state, payload) {
 			state.queue.push(payload.task);
 			if (!state.started) {
 				state.started = true;
-				payload.router.push("/game");
+				if (payload.callback) {
+					payload.callback();
+				}
 			}
+		},
+		POP_QUEUE(state) {
+			state.queue.shift();
 		}
 	},
 	getters: {

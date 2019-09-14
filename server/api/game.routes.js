@@ -14,7 +14,7 @@ module.exports = function (db, io) {
         req.session.code = newgame.code;
         req.session.gameID = newgame._id;
         return res.status(200).json({
-            success: true,
+        success: true,
             game: GameService.GetGameData(newgame),
             player: GameService.GetPlayerData(newplayer),
             players: [newplayer],
@@ -39,6 +39,10 @@ module.exports = function (db, io) {
             newplayer = await GameService.NewPlayer(game, name, false);
         }
         var players = await GameService.FindPlayers(game._id);
+        var tasks = [];
+        if (game.started) {
+            tasks = await GameService.FindOpenTasks(game._id, newplayer._id);
+        }
         game.save();
         io.to(code).emit("NEW_PLAYER", players);
         return res.status(200).json({
@@ -46,7 +50,25 @@ module.exports = function (db, io) {
             game: GameService.GetGameData(game),
             player: GameService.GetPlayerData(newplayer),
             players: players,
+            tasks: tasks,
             message: 'Connected!'
+        });
+    });
+
+    routes.get("/:gameid/players", async function (req, res) {
+        var code = req.params.gameid;
+        //find game to start
+        var game = await GameService.FindGame(code);
+        if (game == null) {
+            return res.status(400).json({
+                success: false,
+                message: "Game not found"
+            });
+        }
+        var players = await GameService.FindPlayers(game._id);
+        return res.status(200).json({
+            success: true,
+            players: players
         });
     });
 
@@ -81,7 +103,8 @@ module.exports = function (db, io) {
                 message: "Game not found"
             });
         }
-        var completedTask = await GameService.FinishTask(game, taskID, content);
+        var task = await GameService.FindTask(taskID);
+        var completedTask = GameService.FinishTask(game, task, content);
         var newTask = await GameService.CreateTask(game, completedTask, nextPlayer);
         return res.status(200).json({
             success: true,

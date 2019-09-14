@@ -12,9 +12,7 @@ function makecode() {
     return code;
 }
 
-function shuffle(array) {
-    array.sort(() => Math.random() - 0.5);
-}
+
 
 function nextStep(prevTask) {
     if (prevTask == null) {
@@ -29,7 +27,7 @@ function getPrompt(prevTask) {
         return "";
     }
     if (prevTask.type == "drawing") {
-        return "/drawings/" + prevTask._id;
+        return "/api/drawings/" + prevTask._id;
     }
     return prevTask.contentString;
 }
@@ -76,6 +74,7 @@ module.exports = {
             createDate: Date.now(),
             name: name,
             game: game._id,
+            playOrder: Math.floor(Math.random() * 100),
             admin: admin
         });
         return p.save().then( function() {
@@ -117,6 +116,19 @@ module.exports = {
         })
     },
 
+    /** @param {id} gameID */
+    /** @param {id} playerID */
+    FindOpenTasks: async function (gameID, playerID) {
+        return Task.find({ game: gameID, 
+                author: playerID, 
+                completed: false }, function (err, t) {
+            if (err) {
+                return [];
+            }
+            return t;
+        })
+    },
+
     /** @param {game} game */
     GetGameData: function (game) {
         return {
@@ -143,21 +155,22 @@ module.exports = {
         });
     },
 
-    FinishTask: async function(game, taskID, content) {
+    FindTask: async function (taskID) {
         //find the task
         return Task.findById(taskID, function (err, t) {
-            if (err) {
-                return null;
-            }
-            t.completed = 1;
-            if (t.type == 'drawing') {
-                t.contentImg = content;
-            } else {
-                t.contentString = content;
-            }
-            t.save();
             return t;
         });
+    },
+
+    FinishTask: function(game, task, content) {
+        task.completed = true;
+        if (task.type == 'drawing') {
+            task.contentImg = content;
+        } else {
+            task.contentString = content;
+        }
+        task.save();
+        return task;
     },
 
     CreateTask: async function(game, prevTask, playerID) {

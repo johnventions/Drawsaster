@@ -1,13 +1,14 @@
 var mongoose = require("mongoose");
 var Schema = mongoose.Schema;
 
+
 var playerSchema = new Schema({
     _id: Schema.Types.ObjectId,
     createDate: { type: Date, Default: Date.now },
     name: String,
     game: Schema.Types.ObjectId,
     admin: Boolean,
-    nextPlayer: { type: Schema.Types.ObjectId, ref: 'Player' },
+    playOrder: Number,
     queue: { type: [Schema.Types.ObjectId], default: []}
 });
 

@@ -7,6 +7,10 @@ import settings from "./settings";
 import store from './store'
 import Axios from "axios";
 
+import VueSignaturePad from 'vue-signature-pad';
+
+Vue.use(VueSignaturePad);
+
 require('./styles/form.styl')
 
 router.beforeEach(authGuard);
@@ -33,6 +37,9 @@ Vue.mixin({
 		},
 		app_players() {
 			return this.$store.state.players;
+		},
+		app_next_player() {
+			return this.$store.state.nextPlayer;
 		}
 	},
 	methods: {
@@ -40,6 +47,15 @@ Vue.mixin({
 			console.log("Joining: ", code);
 			this.$socket.emit('Join', code);
 			this.$socket.emit('Join', playerid);
+		},
+		getPlayersBegin: function () {
+			this.$http.get("/api/game/" + this.app_gamecode + "/players")
+				.then(response => {
+					if (response.data.success) {
+						this.$store.commit("SET_PLAYERS", response.data.players);
+						this.$router.push("/game");
+					}
+				});
 		}
 	}
 });

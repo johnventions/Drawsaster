@@ -24,7 +24,12 @@ export default {
 					user: this.user
 				}).then( function(res) {
 					this.pending = false;
-					this.$store.commit('setup', {player: res.data.player, game: res.data.game, players: res.data.players});
+					this.$store.commit('setup', {
+						player: res.data.player, 
+						game: res.data.game, 
+						players: res.data.players,
+						tasks: res.data.tasks
+					});
 					if ( res.data.game.started ) {
 						this.$router.push("/game");
 					} else {

@@ -17,7 +17,7 @@ export default {
 		});
 
 		this.sockets.subscribe("NEW_TASK", task => {
-			var start = this.$store.commit('ADD_TASK', { task: task, router: this.$router} );
+			var start = this.$store.commit('ADD_TASK', { task: task, callback: this.getPlayersBegin} );
 		});
 
 		//reconnect logic
@@ -34,6 +34,7 @@ export default {
 		});
 	},
 	methods: {
+		
 	}
 };
 </script>

@@ -3,16 +3,20 @@
 
 <script>
 // @ is an alias to /src
-//import HelloWorld from "@/components/HelloWorld.vue";
+	import shuffle from "@/shuffle";
 
 export default {
 	name: "game",
 	data: () => {
 		return {
-			caption: ""
+			caption: "",
 		};
 	},
 	computed: {
+		signaturePad() {
+			return this.$refs['signaturePad'] ? this.$refs['signaturePad'].signaturePad : null;
+		},
+
 		mySubmissions() {
 			return this.$store.state.mySubmissions;
 		},
@@ -30,30 +34,30 @@ export default {
 		}
 	},
 	components: {},
-	mounted: function() {},
 	methods: {
 		getNextPlayer: function() {
-			var remainingPlayers = this.app_players.filter( (player) => {
-				return this.currentTask.chain.indexOf(player._id) == -1;
-			});
-			if (remainingPlayers.length) {
-				return remainingPlayers[0]._id;
+			var n = this.app_next_player;
+			//check if the next player already worked on this chain
+			if (this.currentTask.chain.indexOf(n) > -1) {
+				return null;
 			}
-			return null;
+			return n;
 		},
 		submit: function() {
-			var caption = this.currentTask.type == 'drawing' ? this.caption : this.caption;
+			var data = this.currentTask.type == 'drawing' ? this.signaturePad.toDataURL() : this.caption;
 			var payload = {
 				task: this.currentTask._id,
-				content: caption,
+				content: data,
 				nextPlayer: this.getNextPlayer()
 			};
-			this.$http.post("/api/game/" + this.code + "/submit", payload).then( (res) => {
-				console.log("Submitted", payload);
-			})
-			.catch( (err) => {
+			this.$http.post("/api/game/" + this.code + "/submit", payload)
+				.then( (res) => {
+					console.log("Submitted", payload);
+					this.$store.commit("POP_QUEUE")
+				})
+				.catch( (err) => {
 
-			})
+				});
 		}
 	}
 };
