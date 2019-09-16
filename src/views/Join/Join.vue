@@ -20,7 +20,7 @@ export default {
 			if (this.pending) return;
 			if (this.user != "" && this.code.length == 4) {
 				this.pending = true;
-				this.$http.post("/api/game/" +this.code + "/join", {
+				this.$http.post("/api/game/join/" + this.code, {
 					user: this.user
 				}).then( function(res) {
 					this.pending = false;

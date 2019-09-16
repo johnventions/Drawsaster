@@ -29,6 +29,9 @@ Vue.mixin({
 		app_gamecode() {
 			return this.$store.state.code;
 		},
+		app_gameid() {
+			return this.$store.state.gameID;
+		},
 		app_userid() {
 			return this.$store.state.userID;
 		},
@@ -49,7 +52,7 @@ Vue.mixin({
 			this.$socket.emit('Join', playerid);
 		},
 		getPlayersBegin: function () {
-			this.$http.get("/api/game/" + this.app_gamecode + "/players")
+			this.$http.get("/api/game/" + this.app_gameid + "/players")
 				.then(response => {
 					if (response.data.success) {
 						this.$store.commit("SET_PLAYERS", response.data.players);

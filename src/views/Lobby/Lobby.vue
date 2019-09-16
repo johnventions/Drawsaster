@@ -44,7 +44,7 @@ export default {
 		},
 		startGame: function() {
 			this.pending = true;
-			this.$http.post("/api/game/" + this.status().code + "/start", {})
+			this.$http.post("/api/game/" + this.app_gameid + "/start", {})
 				.then( function() {
 					this.started = true;
 			}.bind(this))

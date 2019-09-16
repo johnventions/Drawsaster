@@ -56,7 +56,7 @@ export default new Vuex.Store({
 			state.nextPlayer = playerID;
 		},
 		SET_QUEUE(state, tasks) {
-			state.queue = tasks;
+			state.queue = tasks || [];
 		},
 		ADD_TASK(state, payload) {
 			state.queue.push(payload.task);

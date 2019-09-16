@@ -6,6 +6,7 @@ const routes = require('express').Router();
 module.exports = function (db, io) {
     GameService.io = io;
 
+    //create new game
     routes.post("/", async function (req, res) {
         var name = req.body.user;
         var newgame = await GameService.NewGame();
@@ -22,9 +23,9 @@ module.exports = function (db, io) {
         });
     });
 
-    routes.post("/:gameid/join", async function (req, res) {
+    routes.post("/join/:gamecode", async function (req, res) {
         var name = req.body.user;
-        var code = req.params.gameid.toUpperCase();
+        var code = req.params.gamecode.toUpperCase();
         var game = await GameService.FindGame(code);
         if (game == null) {
             return res.status(400).json({
@@ -41,7 +42,7 @@ module.exports = function (db, io) {
         var players = await GameService.FindPlayers(game._id);
         var tasks = [];
         if (game.started) {
-            tasks = await GameService.FindOpenTasks(game._id, newplayer._id);
+            tasks = await GameService.FindOpenUserTasks(game._id, newplayer._id);
         }
         game.save();
         io.to(code).emit("NEW_PLAYER", players);
@@ -56,9 +57,9 @@ module.exports = function (db, io) {
     });
 
     routes.get("/:gameid/players", async function (req, res) {
-        var code = req.params.gameid;
+        var id = req.params.gameid;
         //find game to start
-        var game = await GameService.FindGame(code);
+        var game = await GameService.FindGameById(id);
         if (game == null) {
             return res.status(400).json({
                 success: false,
@@ -73,9 +74,9 @@ module.exports = function (db, io) {
     });
 
     routes.post("/:gameid/start", async function(req, res){
-        var code = req.params.gameid;
+        var id = req.params.gameid;
         //find game to start
-        var game = await GameService.FindGame(code);
+        var game = await GameService.FindGameById(id);
         if (game == null) {
             return res.status(400).json({
                 success: false,
@@ -91,23 +92,42 @@ module.exports = function (db, io) {
 
 
     routes.post("/:gameid/submit", async function (req, res) {
-        var code = req.params.gameid;
+        var id = req.params.gameid;
         var taskID = req.body.task;
         var content = req.body.content;
         var nextPlayer = req.body.nextPlayer;
         //find game to start
-        var game = await GameService.FindGame(code);
+        var game = await GameService.FindGameById(id);
         if (game == null) {
+            
+        }
+        var task = await GameService.FindTask(taskID);
+        if (task == null) {
             return res.status(400).json({
                 success: false,
                 message: "Game not found"
             });
         }
-        var task = await GameService.FindTask(taskID);
-        var completedTask = GameService.FinishTask(game, task, content);
-        var newTask = await GameService.CreateTask(game, completedTask, nextPlayer);
+        var completedTask = GameService.FinishTask(task, content);
+        if (nextPlayer) {
+            var newTask = await GameService.CreateTask(completedTask.game, completedTask, nextPlayer);
+        } else {
+            GameService.CompleteChain(game, task);
+            console.log("Finished chain");
+        }
         return res.status(200).json({
             success: true,
+        });
+    });
+
+    routes.get("/:gameid/tasks", async function (req, res) {
+        var id = req.params.gameid;
+        var tasks = await GameService.FindGameTasks(id);
+        var players = await GameService.FindPlayers(id);
+        return res.status(200).json({
+            success: true,
+            tasks: tasks,
+            players: players
         });
     });
 

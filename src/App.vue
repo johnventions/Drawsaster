@@ -20,6 +20,12 @@ export default {
 			var start = this.$store.commit('ADD_TASK', { task: task, callback: this.getPlayersBegin} );
 		});
 
+		this.sockets.subscribe("END_GAME", id => {
+			this.$router.push("/game/" + id);
+		});
+
+		
+
 		//reconnect logic
 		this.$socket.on("reconnect", function() {
 			console.log("Reconnected!");

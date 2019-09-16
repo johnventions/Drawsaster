@@ -7,10 +7,11 @@ module.exports = function (db, io) {
         var id = req.params.drawingid.toUpperCase();
         var drawing = await GameService.FindTask(id);
         if (drawing) {
-            let base64Image = Buffer.from(drawing.contentImg);
+            let base64Image = Buffer.from(drawing.contentImg, 'binary');
             res.setHeader('Content-Type', 'image/png');
             res.status(200);
-            return res.end( base64Image);
+            console.log(drawing.contentImg.toString('base64'));
+            return res.end(drawing.contentImg.toString('base64'));
         }
         return null;
 

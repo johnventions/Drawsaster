@@ -1,0 +1,15 @@
+<main class='container'>
+    <div v-for="task in activeTasks">
+        <template v-if="task.type == 'drawing'">
+            <img v-bind:src="drawingURL(task._id)">
+        </template>
+        <template v-else>
+            <h3>
+                {{ task.contentString }}
+            </h3>
+        </template>
+        <h5>
+            By: {{ authorName(task.author) }}
+        </h5>
+    </div>
+</main>

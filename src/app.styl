@@ -10,9 +10,6 @@ body
     
 
 .btn
-    width 100%
-    @media $tablet-up
-        width auto
 
 p + button
     margin-top 15px
@@ -21,20 +18,26 @@ main
     padding-top 20px
 
 .btn
-        margin 22px auto 15px
-        padding 12px 10px
-        font-size 24px
-        width 90%
-        border 2px solid white
-        background #7ed321
-        text-align center
-        border-radius 6px
-        text-transform uppercase
-        display block
+    margin 22px auto 15px
+    padding 12px 10px
+    font-size 24px
+    width 90%
+    border 2px solid white
+    background #7ed321
+    text-align center
+    border-radius 6px
+    text-transform uppercase
+    display block
+    @media $tablet-up
+        width auto
+
     &.btn-primary
         &:disabled
             background grey
             border-color white
+
+h1, h2, h3, h4, h5, h6, p
+    text-align center
 
 h1
     font-family 'Amatic SC', sans-serif

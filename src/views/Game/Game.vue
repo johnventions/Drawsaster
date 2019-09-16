@@ -50,7 +50,7 @@ export default {
 				content: data,
 				nextPlayer: this.getNextPlayer()
 			};
-			this.$http.post("/api/game/" + this.code + "/submit", payload)
+			this.$http.post("/api/game/" + this.app_gameid + "/submit", payload)
 				.then( (res) => {
 					console.log("Submitted", payload);
 					this.$store.commit("POP_QUEUE")

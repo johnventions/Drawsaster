@@ -95,6 +95,17 @@ module.exports = {
         });
     },
 
+    /** @param {string} code */
+    FindGameById: async function (id) {
+        return Game.findById(id, function (err, game) {
+            if (err) {
+                return null;
+            }
+            return game;
+        });
+    },
+
+
     /** @param {id} gameID */
     /** @param {string} name */
     FindPlayer: async function(gameID, name) {
@@ -118,7 +129,7 @@ module.exports = {
 
     /** @param {id} gameID */
     /** @param {id} playerID */
-    FindOpenTasks: async function (gameID, playerID) {
+    FindOpenUserTasks: async function (gameID, playerID) {
         return Task.find({ game: gameID, 
                 author: playerID, 
                 completed: false }, function (err, t) {
@@ -126,6 +137,20 @@ module.exports = {
                 return [];
             }
             return t;
+        })
+    },
+
+    /**  @param { id } gameID */
+    FindGameTasks: async function (gameID) {
+        return Task.find({
+            game: gameID,
+        }
+        , "_id chain type author contentString"
+        , function (err, tasks) {
+            if (err) {
+                return [];
+            }
+            return tasks;
         })
     },
 
@@ -151,7 +176,7 @@ module.exports = {
         game.save();
         //create a task for each player
         players.forEach( (player, i) => {
-            this.CreateTask(game, null, player._id);
+            this.CreateTask(game._id, null, player._id);
         });
     },
 
@@ -162,7 +187,7 @@ module.exports = {
         });
     },
 
-    FinishTask: function(game, task, content) {
+    FinishTask: function(task, content) {
         task.completed = true;
         if (task.type == 'drawing') {
             task.contentImg = content;
@@ -173,12 +198,12 @@ module.exports = {
         return task;
     },
 
-    CreateTask: async function(game, prevTask, playerID) {
+    CreateTask: async function(gameID, prevTask, playerID) {
         var t = new Task({
             _id: new mongoose.Types.ObjectId,
             createDate: Date.now(),
             author: playerID,
-            game: game._id,
+            game: gameID,
             chain: buildChain(prevTask, playerID),
             type: nextStep(prevTask),
             prompt: getPrompt(prevTask),
@@ -187,5 +212,15 @@ module.exports = {
         t.save();
         this.io.to(playerID).emit("NEW_TASK", t);
         return t;
+    },
+
+    CompleteChain: function (game, prevTask) {
+        //check if there are any open tasks
+        Task.find({game: game._id, completed: 0}, '_id', (err, tasks) => {
+            if (tasks == null || tasks.length == 0) {
+                console.log("Ending " + game.code);
+                this.io.to(game.code).emit("END_GAME", game._id);
+            }
+        });
     }
 }
