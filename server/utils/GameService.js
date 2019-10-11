@@ -27,7 +27,7 @@ function getPrompt(prevTask) {
         return "";
     }
     if (prevTask.type == "drawing") {
-        return "/api/drawings/" + prevTask._id;
+        return prevTask._id;
     }
     return prevTask.contentString;
 }
@@ -187,15 +187,17 @@ module.exports = {
         });
     },
 
-    FinishTask: function(task, content) {
+    FinishTask: async function(task, content) {
         task.completed = true;
         if (task.type == 'drawing') {
             task.contentImg = content;
         } else {
             task.contentString = content;
         }
-        task.save();
-        return task;
+        return task.save()
+            .then( t => {
+                return t;
+            });
     },
 
     CreateTask: async function(gameID, prevTask, playerID) {
@@ -220,6 +222,7 @@ module.exports = {
             if (tasks == null || tasks.length == 0) {
                 console.log("Ending " + game.code);
                 this.io.to(game.code).emit("END_GAME", game._id);
+            } else {
             }
         });
     }

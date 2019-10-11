@@ -2,6 +2,8 @@
 const Game = require("../models/Game.js");
 const GameService = require("../utils/GameService.js");
 const routes = require('express').Router();
+const fs = require('fs')
+
 
 module.exports = function (db, io) {
     GameService.io = io;
@@ -108,7 +110,13 @@ module.exports = function (db, io) {
                 message: "Game not found"
             });
         }
-        var completedTask = GameService.FinishTask(task, content);
+        var completedTask = await GameService.FinishTask(task, content);
+        if (task.type == 'drawing') {
+            const b64 = content.split("base64,")[1];
+            fs.writeFile("./drawings/" + task._id + ".png", b64, 'base64', function(err) {
+
+            });
+        }
         if (nextPlayer) {
             var newTask = await GameService.CreateTask(completedTask.game, completedTask, nextPlayer);
         } else {

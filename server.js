@@ -18,7 +18,7 @@ const db = require('./server/db')(mongoose, session);
 const io = require("./server/sockets.js")(server);
 
 const apiRoutes = require('./server/api/routes')(db, io);
-const drawingRoutes = require('./server/api/drawing.routes')(db, io);
+// const drawingRoutes = require('./server/api/drawing.routes')(db, io);
 
 
 app.use(bodyParser.json( { limit: '10mb', extended: true } ));
@@ -36,6 +36,7 @@ app.use(session({
 app.use(express.static('dist'));
 
 app.use('/api', apiRoutes);
+app.use('/api/drawings', express.static('drawings'));
 
 app.get('/*', function (req, res) {
     res.sendFile(__dirname + '/dist/index.html');

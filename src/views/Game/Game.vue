@@ -43,6 +43,9 @@ export default {
 			}
 			return n;
 		},
+		taskImage: function(task) {
+			return "/api/drawings/" + task.prompt + ".png";
+		},
 		submit: function() {
 			var data = this.currentTask.type == 'drawing' ? this.signaturePad.toDataURL() : this.caption;
 			var payload = {
