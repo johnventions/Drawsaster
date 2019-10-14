@@ -1,8 +1,13 @@
 <main class='container'>
+    <h1>You Did It!</h1>
+    <select v-model="activeStory" v-on:change="updateStory(activeStory)">
+        <option disabled selected v-bind:value="null">Select a story</option>
+        <option v-for="story in stories" v-bind:value="story.author">{{ story.contentString }}</option>
+    </select>
     <div v-for="task in activeTasks">
-        <template v-if="task.type == 'drawing'">
+        <div class='img-container' v-if="task.type == 'drawing'"></template>
             <img v-bind:src="drawingURL(task._id)">
-        </template>
+        </div>
         <template v-else>
             <h3>
                 {{ task.contentString }}

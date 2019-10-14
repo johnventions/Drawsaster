@@ -30,6 +30,7 @@ export default {
 						players: res.data.players,
 						tasks: res.data.tasks
 					});
+					this.joinRoom(this.app_gamecode, this.app_userid);
 					if ( res.data.game.started ) {
 						this.$router.push("/game");
 					} else {

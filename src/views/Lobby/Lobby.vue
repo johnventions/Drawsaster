@@ -20,7 +20,6 @@ export default {
 		CookieService.setCookie("code", this.app_gamecode, 7);
 		CookieService.setCookie("user", this.app_username, 7);
 		CookieService.setCookie("userID", this.app_userid, 7);
-		this.joinRoom(this.app_gamecode, this.app_userid);
 	},
 	methods: {
 		isAdmin: function() {

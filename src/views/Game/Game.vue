@@ -56,7 +56,8 @@ export default {
 			this.$http.post("/api/game/" + this.app_gameid + "/submit", payload)
 				.then( (res) => {
 					console.log("Submitted", payload);
-					this.$store.commit("POP_QUEUE")
+					this.$store.commit("POP_QUEUE");
+					this.caption = "";
 				})
 				.catch( (err) => {
 

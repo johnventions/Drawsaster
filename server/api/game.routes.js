@@ -115,7 +115,7 @@ module.exports = function (db, io) {
             const b64 = content.split("base64,")[1];
             fs.writeFile("./drawings/" + task._id + ".png", b64, 'base64', function(err) {
 
-            });
+            }); 
         }
         if (nextPlayer) {
             var newTask = await GameService.CreateTask(completedTask.game, completedTask, nextPlayer);

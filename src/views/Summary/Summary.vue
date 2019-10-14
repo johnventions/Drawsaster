@@ -1,5 +1,5 @@
 <template src="./Summary.html"></template>
-
+<style src="./Summary.styl" lang="styl"></style>
 <script>
 // @ is an alias to /src
 
@@ -8,21 +8,19 @@ export default {
 	data: () => {
 		return {
 			tasks: [],
-			activeTask: null
+			activeStory: null,
+			activeTasks: []
 		};
 	},
 	components: {
 
 	},
 	computed: {
-		activeTasks() {
-			if (this.tasks != null) {
-				return this.tasks.filter( (v, i) => {
-					return v.chain[0] == this.activeTask;
-				});
-			}
-			return [];
-		},
+		stories() {
+			return this.tasks.filter( function(x) {
+				return x.chain.length == 1;
+			})
+		}
 	},
 	mounted: function() {
 		this.loadTasks();
@@ -32,18 +30,23 @@ export default {
 			var p = this.app_players.find( (x) => {
 				return x._id == id;
 			});
-			console.log(p);
 			return p ? p.name : "--";
 		},
+		updateStory(task) {
+			if (this.tasks != null) {
+				this.activeTasks = this.tasks.filter( (v) => {
+					return v.chain[0] == task;
+				});
+			}
+		},
 		drawingURL: function(id) {
-			return `/api/drawings/${id}`;
+			return `/api/drawings/${id}.png`;
 		},
 		loadTasks: function() {
 			this.$http.get("/api/game/" + this.$route.params.id + "/tasks")
 				.then( function(res) {
 					this.tasks = res.data.tasks;
 					this.$store.commit("SET_PLAYERS", res.data.players);
-					this.activeTask = this.tasks[0].author;
 			}.bind(this))
 			.catch(function(err) {
 				console.log("ERROR", err);
