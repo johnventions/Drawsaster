@@ -10,6 +10,33 @@ export default {
 	data: () => {
 		return {
 			caption: "",
+			brushes: [
+				{
+					"min": 1,
+					"max": 3,
+					"display": "5px"
+				},
+				{
+					"min": 4,
+					"max": 8,
+					"display": "10px"
+				},
+				{
+					"min": 9,
+					"max": 14,
+					"display": "15px"
+				}
+			],
+			colors: [
+				"black",
+				"white",
+				"red",
+				"orange",
+				"yellow",
+				"green",
+				"blue",
+				"purple"
+			]
 		};
 	},
 	computed: {
@@ -45,6 +72,13 @@ export default {
 		},
 		taskImage: function(task) {
 			return "/api/drawings/" + task.prompt + ".png";
+		},
+		setBrush: function(brush) {
+			this.signaturePad.minWidth = brush.min;
+			this.signaturePad.maxWidth = brush.max;
+		},
+		setColor: function(color) {
+			this.signaturePad.penColor = color;
 		},
 		submit: function() {
 			var data = this.currentTask.type == 'drawing' ? this.signaturePad.toDataURL() : this.caption;

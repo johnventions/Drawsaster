@@ -5,11 +5,26 @@
             <h3>
                 {{ currentTask.prompt }}
             </h3>
+            <div class="header-tools">
+                <button class='brush-item'
+                        v-on:click="setBrush(brush)"
+                        v-for="brush in brushes">
+                        <span class='brush-dot' v-bind:style="{ width: brush.display, height: brush.display }">
+                        </span>
+                </button>
+            </div>
             <VueSignaturePad id="signature" 
                     height="90vw"
-                    width="90%"
+                    width="100%"
                     ref="signaturePad">
             </VueSignaturePad>
+            <div class='palette-container'>
+                <button class='palette-item'
+                    v-on:click="setColor(color)"
+                    v-bind:style="{ background: color }"
+                    v-for="color in colors">
+                </button>
+            </div>
         </template>
         <template v-else>
             <h1 v-if="currentTask.type == 'start'">Write Any Phrase</h1>

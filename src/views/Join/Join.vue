@@ -14,7 +14,12 @@ export default {
 		};
 	},
 	components: {},
-	mounted: function() {},
+	mounted: function() {
+		var urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.has('code')) {
+			this.code = urlParams.get("code");
+		}
+	},
 	methods: {
 		join: function() {
 			if (this.pending) return;
