@@ -24,6 +24,7 @@ export default {
 				}).then( function(res){
 					console.log(res);
 					this.$store.commit('setup', {player: res.data.player, game: res.data.game, players: res.data.players});
+					this.joinRoom(this.app_gamecode, this.app_userid);
 					if ( res.data.game.started ) {
 						this.$router.push("/game");
 					} else {
