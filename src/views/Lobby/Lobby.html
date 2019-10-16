@@ -9,6 +9,11 @@
             </div>
         </template>
     </p>
+    <button class='btn btn-secondary'
+        v-if="canShare()"
+        v-on:click="share()">
+        Invite Friends
+    </button>
     <button class='btn btn-primary' 
             v-if="displayStart()" 
             v-on:click="startGame()">

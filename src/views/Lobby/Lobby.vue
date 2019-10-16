@@ -50,6 +50,22 @@ export default {
 			.catch(function(err) {
 				console.log("ERROR", err);
 			});
+		},
+		canShare: function() {
+			if (navigator.share) {
+				return true;
+			}
+			return false;
+		},
+		share: function() {
+			if (navigator.share) {
+				navigator.share({
+					title: document.title,
+					text: "Lets play Drawsaster!",
+					url: "https://www.drawsaster.com/join?code=" + this.app_gamecode 
+				}).then(() => console.log('Successful share'))
+				.catch(error => console.log('Error sharing:', error));
+			}
 		}
 	}
 };
