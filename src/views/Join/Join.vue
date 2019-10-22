@@ -11,6 +11,8 @@ export default {
 			user: CookieService.getCookie("user") || "",
 			code: CookieService.getCookie("code") || "",
 			pending: false,
+			loginError: false,
+			errorMessage: ""
 		};
 	},
 	components: {},
@@ -25,9 +27,10 @@ export default {
 			if (this.pending) return;
 			if (this.user != "" && this.code.length == 4) {
 				this.pending = true;
+				this.loginError = false;
 				this.$http.post("/api/game/join/" + this.code, {
 					user: this.user
-				}).then( function(res) {
+				}).then( (res) => {
 					this.pending = false;
 					this.$store.commit('setup', {
 						player: res.data.player, 
@@ -37,13 +40,18 @@ export default {
 					});
 					this.joinRoom(this.app_gamecode, this.app_userid);
 					if ( res.data.game.started ) {
-						this.$router.push("/game");
+						if (res.data.game.completed) {
+							this.$router.push("/game/" + res.data.game._id);
+						} else {
+							this.$router.push("/game");
+						}
 					} else {
 						this.$router.push("/lobby");
 					}
-				}.bind(this))
+				})
 				.catch( (err) => {
-					console.log("ERROR", err);
+					this.loginError = true;
+					this.errorMessage = err.response.data.message;
 					this.pending = false;
 				});
 			}

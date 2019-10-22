@@ -2,7 +2,7 @@
 const Game = require("../models/Game.js");
 const GameService = require("../utils/GameService.js");
 const routes = require('express').Router();
-const fs = require('fs')
+const fs = require('fs');
 
 
 module.exports = function (db, io) {
@@ -39,7 +39,14 @@ module.exports = function (db, io) {
         var newplayer = await GameService.FindPlayer(game._id, name);
         if (newplayer == null) {
             //create new player if not found
-            newplayer = await GameService.NewPlayer(game, name, false);
+            if (!game.started) {
+                newplayer = await GameService.NewPlayer(game, name, false);
+            } else {
+                return res.status(400).json({
+                    success: false,
+                    message: "Player not found"
+                });
+            }
         }
         var players = await GameService.FindPlayers(game._id);
         var tasks = [];
@@ -113,14 +120,13 @@ module.exports = function (db, io) {
         var completedTask = await GameService.FinishTask(task, content);
         if (task.type == 'drawing') {
             const b64 = content.split("base64,")[1];
-            fs.writeFile("./drawings/" + task._id + ".png", b64, 'base64', function(err) {
-
-            }); 
+            GameService.SaveDrawing(b64, task._id);
         }
         if (nextPlayer) {
             var newTask = await GameService.CreateTask(completedTask.game, completedTask, nextPlayer);
         } else {
             GameService.CompleteChain(game, task);
+            game.save();
             console.log("Finished chain");
         }
         return res.status(200).json({
@@ -132,6 +138,9 @@ module.exports = function (db, io) {
         var id = req.params.gameid;
         var tasks = await GameService.FindGameTasks(id);
         var players = await GameService.FindPlayers(id);
+        tasks = tasks.sort(function(a, b) {
+            return a.chain.length > b.chain.length ? 1 : -1;
+        });
         return res.status(200).json({
             success: true,
             tasks: tasks,
@@ -139,5 +148,37 @@ module.exports = function (db, io) {
         });
     });
 
+    routes.post("/:gameid/chat", async function (req, res) {
+        var id = req.params.gameid;
+        var content = req.body.content;
+        var player = req.body.player;
+        //find game to start
+        var game = await GameService.FindGameById(id);
+        if (game == null) {
+
+        }
+        //save file
+        const b64 = content.split("base64,")[1];
+        var dwg = GameService.SaveDrawing(b64, null);
+        GameService.SendChat(game.code, dwg, player);
+        return res.status(200).json({
+            success: true,
+            drawing: dwg
+        });
+    });
+
     return routes;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -24,7 +24,9 @@ export default {
 			this.$router.push("/game/" + id);
 		});
 
-		
+		this.sockets.subscribe("NEW_CHAT", chat => {
+			this.$store.commit('ADD_CHAT', chat );
+		});
 
 		//reconnect logic
 		this.$socket.on("reconnect", function() {

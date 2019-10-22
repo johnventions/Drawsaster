@@ -19,9 +19,14 @@ Vue.prototype.$http = Axios;
 Vue.prototype.$settings = settings;
 Vue.config.productionTip = false;
 
+var socketURL = window.location.origin;
+if (socketURL.indexOf("localhost") > -1) {
+	socketURL = "http://localhost:5050";
+}
+
 Vue.use(new VueSocketIO({
 	debug: true,
-	connection: 'http://localhost:5050/',
+	connection: socketURL
 }))
 
 Vue.mixin({

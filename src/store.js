@@ -16,7 +16,8 @@ export default new Vuex.Store({
 		nextPlayer: null,
 		players: [],
 		queue: [],
-		mySubmissions: []
+		mySubmissions: [],
+		chats: []
 	},
 	mutations: {
 		setup(state, payload) {
@@ -66,6 +67,9 @@ export default new Vuex.Store({
 					payload.callback();
 				}
 			}
+		},
+		ADD_CHAT(state, payload) {
+			state.chats.push(payload);
 		},
 		POP_QUEUE(state) {
 			state.queue.shift();

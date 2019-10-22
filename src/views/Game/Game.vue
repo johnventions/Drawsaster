@@ -2,13 +2,15 @@
 <style src="./Game.styl" lang="styl"></style>
 
 <script>
-// @ is an alias to /src
-	import shuffle from "@/shuffle";
+import shuffle from "@/shuffle";
 
 export default {
 	name: "game",
 	data: () => {
 		return {
+			chatDrawing: false,
+			gameMode: true,
+			submitting: false,
 			caption: "",
 			brushes: [
 				{
@@ -40,15 +42,15 @@ export default {
 		};
 	},
 	computed: {
-		signaturePad() {
-			return this.$refs['signaturePad'] ? this.$refs['signaturePad'].signaturePad : null;
-		},
-
 		mySubmissions() {
 			return this.$store.state.mySubmissions;
 		},
 		myTasks() {
 			return this.$store.state.queue;
+		},
+		myChats() {
+			var chats = this.$store.state.chats;
+			return [...chats].reverse();
 		},
 		currentTask() {
 			if (this.myTasks.length > 0) {
@@ -62,6 +64,18 @@ export default {
 	},
 	components: {},
 	methods: {
+		signaturePad() {
+			return this.$refs['signaturePad'] ? this.$refs['signaturePad'].signaturePad : null;
+		},
+		chatPad() {
+			return this.$refs['chatPad'] ? this.$refs['chatPad'].signaturePad : null;
+		},
+		authorName: function(id) {
+			var p = this.app_players.find( (x) => {
+				return x._id == id;
+			});
+			return p ? p.name : "--";
+		},
 		getNextPlayer: function() {
 			var n = this.app_next_player;
 			//check if the next player already worked on this chain
@@ -70,28 +84,53 @@ export default {
 			}
 			return n;
 		},
-		taskImage: function(task) {
-			return "/api/drawings/" + task.prompt + ".png";
+		idToImage: function(_id) {
+			return "/api/drawings/" + _id + ".png";
 		},
 		setBrush: function(brush) {
-			this.signaturePad.minWidth = brush.min;
-			this.signaturePad.maxWidth = brush.max;
+			this.signaturePad().minWidth = brush.min;
+			this.signaturePad().maxWidth = brush.max;
 		},
 		setColor: function(color) {
-			this.signaturePad.penColor = color;
+			this.signaturePad().penColor = color;
 		},
 		submit: function() {
-			var data = this.currentTask.type == 'drawing' ? this.signaturePad.toDataURL() : this.caption;
+			if (this.submitting) {
+				return;
+			}
+			var data = this.currentTask.type == 'drawing' ? document.querySelector("#signature > canvas").toDataURL() : this.caption;
 			var payload = {
 				task: this.currentTask._id,
 				content: data,
 				nextPlayer: this.getNextPlayer()
 			};
+			this.submitting = true;
 			this.$http.post("/api/game/" + this.app_gameid + "/submit", payload)
 				.then( (res) => {
-					console.log("Submitted", payload);
 					this.$store.commit("POP_QUEUE");
 					this.caption = "";
+					this.gameMode = false;
+					this.submitting = false;
+				})
+				.catch( (err) => {
+					this.submitting = false;
+				});
+		},
+		startNext: function() {
+			this.gameMode = true;
+		},
+		addChat() {
+			this.chatDrawing = true;
+		},
+		sendChat() {
+			var data = document.querySelector("#signature2 > canvas").toDataURL();
+			var payload = {
+				player: this.app_userid,
+				content: data,
+			};
+			this.chatDrawing = false;
+			this.$http.post("/api/game/" + this.app_gameid + "/chat", payload)
+				.then( (res) => {
 				})
 				.catch( (err) => {
 

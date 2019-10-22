@@ -1,6 +1,7 @@
 const Game = require("../models/Game.js");
 const Player = require("../models/Player.js");
 const Task = require("../models/Task.js");
+const fs = require('fs');
 var mongoose = require("mongoose");
 
 const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -218,6 +219,7 @@ module.exports = {
 
     CompleteChain: function (game, prevTask) {
         //check if there are any open tasks
+        game.completed = true;
         Task.find({game: game._id, completed: 0}, '_id', (err, tasks) => {
             if (tasks == null || tasks.length == 0) {
                 console.log("Ending " + game.code);
@@ -225,5 +227,19 @@ module.exports = {
             } else {
             }
         });
+    },
+
+    SaveDrawing(b64, _id) {
+        if (_id == null) {
+            _id = mongoose.Types.ObjectId();
+        }
+        fs.writeFile("./drawings/" + _id + ".png", b64, 'base64', function (err) {
+
+        });
+        return _id;
+    },
+
+    SendChat(gameID, _id, player) {
+        this.io.to(gameID).emit("NEW_CHAT", { drawing: _id, player: player} );
     }
 }

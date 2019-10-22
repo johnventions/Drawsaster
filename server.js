@@ -9,7 +9,7 @@ const settings = require("./server/settings");
 
 var app = express();
 
-var server = app.listen(process.env.PORT || 5050, '0.0.0.0', function () {
+var server = app.listen(process.env.PORT || 5050, function () {
     var port = server.address().port;
     console.log("App now running on port", port);
 });
@@ -27,7 +27,7 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use(session({
-    secret: settings.sessionSecret || "n/a",
+    secret: settings.sessionSecret || "drawsastaaaa",
     resave: true,
     saveUninitialized: true,
     store: new MongoStore({ mongooseConnection: mongoose.connection })
@@ -37,6 +37,9 @@ app.use(express.static('dist'));
 
 app.use('/api', apiRoutes);
 app.use('/api/drawings', express.static('drawings'));
+
+console.log(__dirname + '/dist/index.html');
+
 
 app.get('/*', function (req, res) {
     res.sendFile(__dirname + '/dist/index.html');

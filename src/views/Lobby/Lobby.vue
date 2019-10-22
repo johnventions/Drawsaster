@@ -16,6 +16,11 @@ export default {
 	components: {
 
 	},
+	computed: {
+		shareURL: function() {
+			return window.location.origin + "/join?code=" + this.app_gamecode;
+		}
+	},
 	mounted: function() {
 		CookieService.setCookie("code", this.app_gamecode, 7);
 		CookieService.setCookie("user", this.app_username, 7);
@@ -52,19 +57,28 @@ export default {
 			});
 		},
 		canShare: function() {
-			if (navigator.share) {
-				return true;
-			}
-			return false;
+			return true;
 		},
 		share: function() {
 			if (navigator.share) {
 				navigator.share({
 					title: document.title,
 					text: "Lets play Drawsaster!",
-					url: "https://www.drawsaster.com/join?code=" + this.app_gamecode 
+					url: this.shareURL
 				}).then(() => console.log('Successful share'))
 				.catch(error => console.log('Error sharing:', error));
+			} else {
+				navigator.permissions.query({name: "clipboard-write"}).then(result => {
+					if (result.state == "granted" || result.state == "prompt") {
+						/* write to the clipboard now */
+						navigator.clipboard.writeText(this.shareURL);
+					} else {
+						var copyText = document.getElementById("shareURL");
+						copyText.select();
+						document.execCommand("copy");
+					}
+				});
+				alert("Share URL copied to clipboard");				
 			}
 		}
 	}

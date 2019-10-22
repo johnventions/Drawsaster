@@ -1,6 +1,6 @@
 <main class='game container'>
-    <template v-if="currentTask != null">
-        <template  v-if="currentTask.type == 'drawing'">
+    <div v-if="currentTask != null && gameMode">
+        <template v-if="currentTask.type == 'drawing'">
             <h1>Draw This</h1>
             <h3>
                 {{ currentTask.prompt }}
@@ -31,14 +31,29 @@
             <h1 v-if="currentTask.type == 'caption'">Caption This</h1>
             <input v-model="caption">
             <div class='img-container' v-if="currentTask.type == 'caption'">
-                <img v-bind:src="taskImage(currentTask)">
+                <img v-bind:src="idToImage(currentTask.prompt)">
             </div>
         </template>
         <button class='btn btn-primary' v-on:click="submit()">
             Submit
         </button>
-    </template>
-    <template v-if="currentTask == null">
+    </div>
+    <div class='limbo' v-if="currentTask == null || !gameMode">
         <h3>You're in limbo! Hang out while you wait for another task.</h3>
-    </template>
+        <div v-if="chatDrawing">
+            <VueSignaturePad id="signature2" height="90vw" width="100%" ref="chatPad">
+            </VueSignaturePad>
+            <button id="sendButton" class='btn btn-primary' v-on:click="sendChat()">Send</button>
+        </div>
+        <div v-show="!chatDrawing">
+            <button v-if="currentTask != null" class='btn btn-primary' v-on:click="startNext()"> Next Task</button>
+            <button id="startChatButton" class='btn btn-secondary' v-on:click="addChat()">Chat</button>
+            <div class="chatList">
+                <div v-for="chat in myChats">
+                    <p>{{ authorName(chat.player) }}:</p>
+                    <img v-bind:src="idToImage(chat.drawing)">
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
