@@ -18,6 +18,9 @@ export default {
 
 		this.sockets.subscribe("NEW_TASK", task => {
 			var start = this.$store.commit('ADD_TASK', { task: task, callback: this.getPlayersBegin} );
+			if (navigator.vibrate) {
+				navigator.vibrate([150, 100, 150]);
+			}
 		});
 
 		this.sockets.subscribe("END_GAME", id => {
