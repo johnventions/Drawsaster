@@ -8,19 +8,26 @@
             <div class="header-tools">
                 <button class='brush-item'
                         v-on:click="setBrush(brush)"
+                        v-bind:class="{ active: (activeBrush == brush)}"
                         v-for="brush in brushes">
                         <span class='brush-dot' v-bind:style="{ width: brush.display, height: brush.display }">
                         </span>
+                </button>
+                <button class="undo" v-on:click="undo">
+                    Undo
                 </button>
             </div>
             <VueSignaturePad id="signature" 
                     height="90vw"
                     width="100%"
+                    :onEnd="onEnd"
+                    :options="options"
                     ref="signaturePad">
             </VueSignaturePad>
             <div class='palette-container'>
                 <button class='palette-item'
                     v-on:click="setColor(color)"
+                    v-bind:class="{ active: activeColor == color }"
                     v-bind:style="{ background: color }"
                     v-for="color in colors">
                 </button>
@@ -46,7 +53,9 @@
             <button id="sendButton" class='btn btn-primary' v-on:click="sendChat()">Send</button>
         </div>
         <div v-show="!chatDrawing">
-            <button v-if="currentTask != null" class='btn btn-primary' v-on:click="startNext()"> Next Task</button>
+            <button v-if="currentTask != null"
+                    class='btn btn-primary' 
+                    v-on:click="startNext()"> Next Task</button>
             <button id="startChatButton" class='btn btn-secondary' v-on:click="addChat()">Chat</button>
             <div class="chatList">
                 <div v-for="chat in myChats">

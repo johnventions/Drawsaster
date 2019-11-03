@@ -12,20 +12,27 @@ export default {
 			gameMode: true,
 			submitting: false,
 			caption: "",
+			brushMax: 3,
+			activeColor: "black",
+			activeBrush: null,
+			penHistory: [],
 			brushes: [
 				{
-					"min": 1,
-					"max": 3,
+					"dotSize": 2,
+					"minWidth": 2,
+					"maxWidth": 3,
 					"display": "5px"
 				},
 				{
-					"min": 4,
-					"max": 8,
+					"dotSize": 5,
+					"minWidth": 5,
+					"maxWidth": 8,
 					"display": "10px"
 				},
 				{
-					"min": 9,
-					"max": 14,
+					"dotSize": 12,
+					"minWidth": 12,
+					"maxWidth": 14,
 					"display": "15px"
 				}
 			],
@@ -42,6 +49,17 @@ export default {
 		};
 	},
 	computed: {
+		options() {
+			return {
+				backgroundColor: "white",
+				dotSize: 3,
+				minWidth: 2, 
+				maxWidth: 3,
+				minDistance: 5,
+				penColor: this.activeColor,
+				onEnd: this.onEnd,
+			}
+		},
 		mySubmissions() {
 			return this.$store.state.mySubmissions;
 		},
@@ -63,9 +81,51 @@ export default {
 		}
 	},
 	components: {},
+	mounted: function() {
+		if (this.currentTask && this.currentTask.type == 'drawing') {
+			this.setupCanvas();
+		}
+	},
 	methods: {
 		signaturePad() {
 			return this.$refs['signaturePad'] ? this.$refs['signaturePad'].signaturePad : null;
+		},
+		setupCanvas() {
+			console.log("Setup Canvas");
+			this.setBrush( this.brushes[0] );
+			this.setColor("black");
+		},
+		undo() {
+			if (this.signaturePad()) {
+				const data = this.signaturePad().toData();
+				if (data) {
+					//store original data
+					var brush = this.activeBrush;
+					var color = this.activeColor;
+					//remove the last line and pen history
+					data.pop();
+					this.penHistory.pop();
+					//clear the drawing pad
+					this.signaturePad().clear();
+					let newData = [];
+					data.forEach( (v, i) => {
+						console.log(v);
+						// loop through history and re-draw with correct settings
+						var pen = this.penHistory[i];
+						this.setBrush(pen.brush);
+						this.setColor(pen.color);
+						this.$refs['signaturePad'].signaturePad.addFromData([v]);
+					});
+					this.setColor(color);
+					this.setBrush(brush);
+				}
+			}
+		},
+		onEnd(data) {
+			this.penHistory.push({
+				brush: this.activeBrush,
+				color: this.activeColor
+			});
 		},
 		chatPad() {
 			return this.$refs['chatPad'] ? this.$refs['chatPad'].signaturePad : null;
@@ -88,10 +148,13 @@ export default {
 			return "/api/drawings/" + _id + ".png";
 		},
 		setBrush: function(brush) {
-			this.signaturePad().minWidth = brush.min;
-			this.signaturePad().maxWidth = brush.max;
+			this.activeBrush = brush;
+			this.signaturePad().dotSize = brush.dotSize;
+			this.signaturePad().minWidth = brush.minWidth;
+			this.signaturePad().maxWidth = brush.maxWidth;
 		},
 		setColor: function(color) {
+			this.activeColor = color;
 			this.signaturePad().penColor = color;
 		},
 		submit: function() {
@@ -105,6 +168,7 @@ export default {
 				nextPlayer: this.getNextPlayer()
 			};
 			this.submitting = true;
+			this.penHistory = [];
 			this.$http.post("/api/game/" + this.app_gameid + "/submit", payload)
 				.then( (res) => {
 					this.$store.commit("POP_QUEUE");
@@ -118,6 +182,9 @@ export default {
 		},
 		startNext: function() {
 			this.gameMode = true;
+			this.$nextTick( ()=> {
+				this.setupCanvas();
+			});
 		},
 		addChat() {
 			this.chatDrawing = true;
