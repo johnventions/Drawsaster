@@ -219,10 +219,10 @@ module.exports = {
 
     CompleteChain: function (game, prevTask) {
         //check if there are any open tasks
-        game.completed = true;
         Task.find({game: game._id, completed: 1}, '_id', (err, tasks) => {
             // if there are the correct number of completed tasks
             if (tasks.length == (game.players * game.players)) {
+                game.completed = true;
                 console.log("Ending " + game.code);
                 this.io.to(game.code).emit("END_GAME", game._id);
             } else {
