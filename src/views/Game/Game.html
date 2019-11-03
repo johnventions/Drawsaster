@@ -50,13 +50,17 @@
         <div v-if="chatDrawing">
             <VueSignaturePad id="signature2" height="90vw" width="100%" ref="chatPad">
             </VueSignaturePad>
-            <button id="sendButton" class='btn btn-primary' v-on:click="sendChat()">Send</button>
+            <button id="sendButton" class='btn btn-primary'
+                v-on:click="sendChat()">Send</button>
+            <button id="cancelChatButton" class='btn btn-secondary'
+                v-on:click="cancelChat()">Back</button>
         </div>
         <div v-show="!chatDrawing">
             <button v-if="currentTask != null"
                     class='btn btn-primary' 
                     v-on:click="startNext()"> Next Task</button>
-            <button id="startChatButton" class='btn btn-secondary' v-on:click="addChat()">Chat</button>
+            <button id="startChatButton" class='btn btn-secondary' 
+                v-on:click="addChat()">Chat</button>
             <div class="chatList">
                 <div v-for="chat in myChats">
                     <p>{{ authorName(chat.player) }}:</p>

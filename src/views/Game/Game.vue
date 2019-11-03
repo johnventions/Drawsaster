@@ -90,8 +90,10 @@ export default {
 		signaturePad() {
 			return this.$refs['signaturePad'] ? this.$refs['signaturePad'].signaturePad : null;
 		},
+		chatPad() {
+			return this.$refs['chatPad'] ? this.$refs['chatPad'].signaturePad : null;
+		},
 		setupCanvas() {
-			console.log("Setup Canvas");
 			this.setBrush( this.brushes[0] );
 			this.setColor("black");
 		},
@@ -109,12 +111,11 @@ export default {
 					this.signaturePad().clear();
 					let newData = [];
 					data.forEach( (v, i) => {
-						console.log(v);
 						// loop through history and re-draw with correct settings
 						var pen = this.penHistory[i];
 						this.setBrush(pen.brush);
 						this.setColor(pen.color);
-						this.$refs['signaturePad'].signaturePad.addFromData([v]);
+						this.$refs['signaturePad'].signaturePad.fromData([v], false);
 					});
 					this.setColor(color);
 					this.setBrush(brush);
@@ -161,6 +162,11 @@ export default {
 			if (this.submitting) {
 				return;
 			}
+			if (this.currentTask.type == 'drawing') {
+				if ( this.signaturePad().isEmpty() ) {
+					return;
+				}
+			}
 			var data = this.currentTask.type == 'drawing' ? document.querySelector("#signature > canvas").toDataURL() : this.caption;
 			var payload = {
 				task: this.currentTask._id,
@@ -189,7 +195,13 @@ export default {
 		addChat() {
 			this.chatDrawing = true;
 		},
+		cancelChat() {
+			this.chatDrawing = false;
+		},
 		sendChat() {
+			if (this.chatPad().isEmpty()) {
+				return;
+			}
 			var data = document.querySelector("#signature2 > canvas").toDataURL();
 			var payload = {
 				player: this.app_userid,

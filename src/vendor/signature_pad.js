@@ -270,9 +270,12 @@ var SignaturePad = (function () {
     SignaturePad.prototype.isEmpty = function () {
         return this._isEmpty;
     };
-    SignaturePad.prototype.fromData = function (pointGroups) {
+    SignaturePad.prototype.fromData = function (pointGroups, clear) {
         var _this = this;
-        this.clear();
+        if (clear === void 0) { clear = true; }
+        if (clear) {
+            this.clear();
+        }
         this._fromData(pointGroups, function (_a) {
             var color = _a.color, curve = _a.curve;
             return _this._drawCurve({ color: color, curve: curve });
@@ -280,18 +283,7 @@ var SignaturePad = (function () {
             var color = _a.color, point = _a.point;
             return _this._drawDot({ color: color, point: point });
         });
-        this._data = pointGroups;
-    };
-    SignaturePad.prototype.addFromData = function (pointGroups) {
-        var _this = this;
-        this._fromData(pointGroups, function (_a) {
-            var color = _a.color, curve = _a.curve;
-            return _this._drawCurve({ color: color, curve: curve });
-        }, function (_a) {
-            var color = _a.color, point = _a.point;
-            return _this._drawDot({ color: color, point: point });
-        });
-        this._data = this._data.concat(pointGroups);
+        this._data = clear ? pointGroups : this._data.concat(pointGroups);
     };
     SignaturePad.prototype.toData = function () {
         return this._data;
