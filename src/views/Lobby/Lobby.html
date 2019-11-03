@@ -18,7 +18,5 @@
             v-on:click="startGame()">
         Start
     </button>
-    <div id="shareURL" class=''>
-        {{ shareURL }}
-    </div>
+    <textarea id="shareURL" v-on:click="share()">{{ shareURL }}</textarea>
 </main>
