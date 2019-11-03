@@ -8,22 +8,6 @@ import store from './store'
 import Axios from "axios";
 import VueSignaturePad from './vendor/vue-signature-pad.esm';
 
-// VueSignaturePad.methods.addFromData = function (pointGroups) {
-// 	var proto = Object.getPrototypeOf(this.signaturePad);
-// 	if (proto.addFromData == null) {
-// 		proto.addFromData = function(pointGroups) {
-// 			console.log("hey");
-// 			this._fromData(pointGroups, ({ color, curve }) => this._drawCurve({ color, curve }), ({ color, point }) => this._drawDot({ color, point }));
-// 			//this._data = pointGroups;
-// 		}
-// 	}
-// 	proto.addFromData(pointGroups);
-// }
-
-// console.log(VueSignaturePad);
-// console.log(VueSignaturePad.SignaturePad);
-
-
 Vue.use(VueSignaturePad);
 
 require('./styles/form.styl')
@@ -67,7 +51,6 @@ Vue.mixin({
 	},
 	methods: {
 		joinRoom: function(code, playerid) {
-			console.log("Joining: ", code);
 			this.$socket.emit('Join', code);
 			this.$socket.emit('Join', playerid);
 		},

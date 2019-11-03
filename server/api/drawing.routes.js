@@ -20,18 +20,6 @@ module.exports = function (db, io) {
             }
             //not found
             return res.send("Fail");
-
-            // let base64Image = Buffer.from(drawing.contentImg, 'base64');
-            // const im = base64Image.toString().split(",")[1];
-            // const img = Buffer.from(im, 'base64');
-            // console.log("Generating Image");
-            // res.writeHead(200, {
-            //     'Content-Type': 'image/png',
-            //     'Content-Length': img.length
-            // });
-            // // res.end(img);
-            // // console.log(drawing.contentImg.toString('base64'));
-            // return res.end( img );
         } else {
             return null;
         }

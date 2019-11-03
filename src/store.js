@@ -21,7 +21,6 @@ export default new Vuex.Store({
 	},
 	mutations: {
 		setup(state, payload) {
-			console.log("Setup");
 			this.commit('SET_LOGIN', payload.player);
 			this.commit('SET_GAME', payload.game);
 			this.commit('SET_PLAYERS', payload.players)
@@ -42,7 +41,6 @@ export default new Vuex.Store({
 			state.players = players.sort( function(a, b) {
 				return a.playOrder > b.playOrder ? 1 : -1;
 			});
-			console.log(players);
 			var curPlayer = state.userID;
 			var i = state.players.findIndex( p => {
 				return p._id == curPlayer;

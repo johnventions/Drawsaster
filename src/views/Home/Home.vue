@@ -11,16 +11,8 @@ export default {
 	},
 	components: {},
 	mounted: function() {
-		console.log(this.sockets);
-		this.sockets.unsubscribe("message");
-		this.sockets.subscribe("message", m => {
-			this.receive(m);
-		});
 	},
 	methods: {
-		receive: function(m) {
-			console.log(m);
-		}
 	}
 };
 </script>
