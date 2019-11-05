@@ -1,0 +1,43 @@
+.speak-right
+    text-align right
+    .bubble
+        margin-right 10px
+        &:after
+            left calc(100% - 6px)
+
+.speak-left
+    text-align left
+    .bubble
+        margin-left 10px
+        &:after
+            left calc(0% - 6px)
+
+.speak-up
+    text-align center
+    .bubble
+        &:after
+            left calc(50% - 6px)
+            top -6px
+
+.bubble
+    padding 5px 15px
+    border-radius 7px
+    position relative
+    display inline-block
+    background white
+    color black
+    margin-bottom 15px
+    &:after
+        content ' '
+        width 12px
+        height 12px
+        display inline-block
+        position absolute
+        top calc(50% - 6px)
+        transform rotate(45deg)
+        background white
+    &.bubble-dark
+        background #2d2828
+        color white
+        &:after
+            background #2d2828

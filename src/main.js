@@ -11,6 +11,7 @@ import VueSignaturePad from './vendor/vue-signature-pad.esm';
 Vue.use(VueSignaturePad);
 
 require('./styles/form.styl')
+require('./styles/bubbles.styl')
 
 router.beforeEach(authGuard);
 

@@ -1,7 +1,14 @@
 <main class='game container'>
     <div v-if="currentTask != null && gameMode">
+        <div class='speak-up'>
+            <div v-if="currentTask.type == 'drawing'" class='bubble bubble-dark'>
+                Draw This 🎨</div>
+            <div v-if="currentTask.type == 'start'" class='bubble bubble-dark'>
+                Write Any Phrase ✏️</div>
+            <div v-if="currentTask.type == 'caption'" class='bubble bubble-dark'>
+                Caption This 💬</div>
+        </div>
         <template v-if="currentTask.type == 'drawing'">
-            <h1>Draw This</h1>
             <h3>
                 {{ currentTask.prompt }}
             </h3>
@@ -11,7 +18,7 @@
                         v-bind:class="{ active: (activeBrush == brush)}"
                         v-for="brush in brushes">
                         <span class='brush-dot' v-bind:style="{ width: brush.display, height: brush.display }">
-                        </span>
+                    </span>
                 </button>
                 <button class="undo" v-on:click="undo">
                     Undo
@@ -34,8 +41,6 @@
             </div>
         </template>
         <template v-else>
-            <h1 v-if="currentTask.type == 'start'">Write Any Phrase</h1>
-            <h1 v-if="currentTask.type == 'caption'">Caption This</h1>
             <input v-model="caption">
             <div class='img-container' v-if="currentTask.type == 'caption'">
                 <img v-bind:src="idToImage(currentTask.prompt)">
@@ -64,7 +69,9 @@
             <div class="chatList">
                 <div v-for="chat in myChats">
                     <p>{{ authorName(chat.player) }}:</p>
-                    <img v-bind:src="idToImage(chat.drawing)">
+                    <div class='bubble'>
+                        <img v-bind:src="idToImage(chat.drawing)">
+                    </div>
                 </div>
             </div>
         </div>
