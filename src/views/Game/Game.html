@@ -1,17 +1,19 @@
 <main class='game container'>
-    <div v-if="currentTask != null && gameMode">
+    <div class='task' v-if="currentTask != null && gameMode">
         <div class='speak-up'>
             <div v-if="currentTask.type == 'drawing'" class='bubble bubble-dark'>
-                Draw This 🎨</div>
+                🎨 Draw This<br/>
+                "{{ currentTask.prompt }}"
+            </div>
             <div v-if="currentTask.type == 'start'" class='bubble bubble-dark'>
-                Write Any Phrase ✏️</div>
+                ✏️ Write Any Phrase 
+            </div>
             <div v-if="currentTask.type == 'caption'" class='bubble bubble-dark'>
-                Caption This 💬</div>
+                💬 Caption This
+            </div>
         </div>
+
         <template v-if="currentTask.type == 'drawing'">
-            <h3>
-                {{ currentTask.prompt }}
-            </h3>
             <div class="header-tools">
                 <button class='brush-item'
                         v-on:click="setBrush(brush)"
@@ -51,9 +53,10 @@
         </button>
     </div>
     <div class='limbo' v-if="currentTask == null || !gameMode">
-        <h3>You're in limbo! Hang out while you wait for another task.</h3>
         <div v-if="chatDrawing">
-            <VueSignaturePad id="signature2" height="90vw" width="100%" ref="chatPad">
+            <VueSignaturePad id="signature2" 
+                height="70vw" 
+                width="70vw" ref="chatPad">
             </VueSignaturePad>
             <button id="sendButton" class='btn btn-primary'
                 v-on:click="sendChat()">Send</button>
@@ -61,18 +64,35 @@
                 v-on:click="cancelChat()">Back</button>
         </div>
         <div v-show="!chatDrawing">
+            <div class='speak-up'>
+                <div class='bubble bubble-dark' v-if="currentTask == null">
+                    All set for now!<br /> Wait for your next task.
+                </div>
+                <div class='bubble bubble-dark' v-if="currentTask != null">
+                    💥 Alright! New task is here!
+                </div>
+            </div>
             <button v-if="currentTask != null"
                     class='btn btn-primary' 
                     v-on:click="startNext()"> Next Task</button>
             <button id="startChatButton" class='btn btn-secondary' 
                 v-on:click="addChat()">Chat</button>
             <div class="chatList">
-                <div v-for="chat in myChats">
+                <div v-for="(chat, index) in myChats" 
+                    v-bind:class="chatClass(index)"
+                    class='speak-up'>
                     <p>{{ authorName(chat.player) }}:</p>
                     <div class='bubble'>
                         <img v-bind:src="idToImage(chat.drawing)">
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <div class="notification" v-if="showAlert">
+        <div class='speak-down'>
+            <div class='bubble bubble-dark'>
+                ⚠️ New Task!
             </div>
         </div>
     </div>

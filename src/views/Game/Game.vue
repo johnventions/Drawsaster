@@ -66,6 +66,9 @@ export default {
 		myTasks() {
 			return this.$store.state.queue;
 		},
+		showAlert() {
+			return this.$store.state.showAlert;
+		},
 		myChats() {
 			var chats = this.$store.state.chats;
 			return [...chats].reverse();
@@ -214,6 +217,10 @@ export default {
 				.catch( (err) => {
 
 				});
+		},
+		chatClass(index) {
+			var m = (this.myChats.length - index) % 2;
+			return m ? "chat-left" : "chat-right";
 		}
 	}
 };

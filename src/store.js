@@ -17,7 +17,8 @@ export default new Vuex.Store({
 		players: [],
 		queue: [],
 		mySubmissions: [],
-		chats: []
+		chats: [],
+		showAlert: false
 	},
 	mutations: {
 		setup(state, payload) {
@@ -64,6 +65,12 @@ export default new Vuex.Store({
 				if (payload.callback) {
 					payload.callback();
 				}
+			} else {
+				state.showAlert = true;
+				setTimeout( () => {
+					state.showAlert = false;
+					console.log(state.showAlert);
+				}, 5000);
 			}
 		},
 		ADD_CHAT(state, payload) {

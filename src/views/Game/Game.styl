@@ -7,6 +7,23 @@
         height 90vw
         background white
 
+@keyframes slideright {
+    0% {
+        transform: translateX(-100%)
+    }
+    100% { 
+        transform: translateX(0)
+    }
+}
+@keyframes slideleft {
+    0% {
+        transform: translateX(100%)
+    }
+    100% { 
+        transform: translateX(0)
+    }
+}
+
 .palette-container
     display flex
     button.palette-item
@@ -50,16 +67,43 @@
             left 50%
             transform translate(-50%, -50%)
 .limbo
-    canvas
-        border-radius 50%
-        background white
-.chatList
-    p
-        text-align left
-    img
-        background white
-        width 50%
-        border-radius 50%
-        display block
+    #signature2
         margin-left auto
         margin-right auto
+    canvas
+        border-radius 7px
+        background white
+.chatList
+    div:first-of-type
+        &.chat-left
+            animation-duration: 2s;
+            animation-name: slideright;
+            animation-direction normal
+        &.chat-right
+            animation-duration: 2s;
+            animation-name: slideleft;
+            animation-direction normal
+    img
+        background white
+        width 100%
+        border-radius 7px
+        display block
+    .bubble
+        width 60%
+        padding 0
+    .chat-left
+        text-align left
+        p
+            text-align left
+        .bubble
+            &:after
+                left 20px
+    .chat-right
+        text-align right
+        p
+            text-align right
+        .bubble
+            &:after
+                left calc(100% - 32px)
+.task .bubble
+    min-width 75%
