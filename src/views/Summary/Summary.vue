@@ -1,5 +1,5 @@
 <template src="./Summary.html"></template>
-<style src="./Summary.styl" lang="styl"></style>
+<style src="./Summary.styl" lang="styl" scoped></style>
 <script>
 // @ is an alias to /src
 

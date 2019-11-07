@@ -15,7 +15,6 @@ export default {
 			brushMax: 3,
 			activeColor: "black",
 			activeBrush: null,
-			penHistory: [],
 			brushes: [
 				{
 					"dotSize": 2,
@@ -104,32 +103,12 @@ export default {
 			if (this.signaturePad()) {
 				const data = this.signaturePad().toData();
 				if (data) {
-					//store original data
-					var brush = this.activeBrush;
-					var color = this.activeColor;
-					//remove the last line and pen history
-					data.pop();
-					this.penHistory.pop();
-					//clear the drawing pad
-					this.signaturePad().clear();
-					let newData = [];
-					data.forEach( (v, i) => {
-						// loop through history and re-draw with correct settings
-						var pen = this.penHistory[i];
-						this.setBrush(pen.brush);
-						this.setColor(pen.color);
-						this.$refs['signaturePad'].signaturePad.fromData([v], false);
-					});
-					this.setColor(color);
-					this.setBrush(brush);
+					this.signaturePad().undo();
 				}
 			}
 		},
 		onEnd(data) {
-			this.penHistory.push({
-				brush: this.activeBrush,
-				color: this.activeColor
-			});
+			
 		},
 		chatPad() {
 			return this.$refs['chatPad'] ? this.$refs['chatPad'].signaturePad : null;
@@ -177,7 +156,6 @@ export default {
 				nextPlayer: this.getNextPlayer()
 			};
 			this.submitting = true;
-			this.penHistory = [];
 			this.$http.post("/api/game/" + this.app_gameid + "/submit", payload)
 				.then( (res) => {
 					this.$store.commit("POP_QUEUE");

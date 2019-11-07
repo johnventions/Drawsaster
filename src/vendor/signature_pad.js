@@ -189,9 +189,9 @@ var SignaturePad = (function () {
         }
         this.dotSize =
             options.dotSize ||
-                function dotSize() {
-                    return (this.minWidth + this.maxWidth) / 2;
-                };
+            function dotSize() {
+                return (this.minWidth + this.maxWidth) / 2;
+            };
         this.penColor = options.penColor || 'black';
         this.backgroundColor = options.backgroundColor || 'rgba(0,0,0,0)';
         this.onBegin = options.onBegin;
@@ -285,12 +285,19 @@ var SignaturePad = (function () {
         });
         this._data = clear ? pointGroups : this._data.concat(pointGroups);
     };
+    SignaturePad.prototype.undo = function () {
+        this._data.pop();
+        this.fromData(this._data);
+    };
     SignaturePad.prototype.toData = function () {
         return this._data;
     };
     SignaturePad.prototype._strokeBegin = function (event) {
         var newPointGroup = {
+            brushMax: this.maxWidth,
+            brushMin: this.minWidth,
             color: this.penColor,
+            dotSize: typeof this.dotSize === 'function' ? this.dotSize() : this.dotSize,
             points: []
         };
         if (typeof this.onBegin === 'function') {
@@ -435,12 +442,15 @@ var SignaturePad = (function () {
     SignaturePad.prototype._fromData = function (pointGroups, drawCurve, drawDot) {
         for (var _i = 0, pointGroups_1 = pointGroups; _i < pointGroups_1.length; _i++) {
             var group = pointGroups_1[_i];
-            var color = group.color, points = group.points;
+            var color = group.color, dotSize = group.dotSize, brushMax = group.brushMax, brushMin = group.brushMin, points = group.points;
+            this.dotSize = dotSize;
+            this.minWidth = brushMin;
+            this.maxWidth = brushMax;
+            this.penColor = color;
             if (points.length > 1) {
                 for (var j = 0; j < points.length; j += 1) {
                     var basicPoint = points[j];
                     var point = new Point(basicPoint.x, basicPoint.y, basicPoint.time);
-                    this.penColor = color;
                     if (j === 0) {
                         this._reset();
                     }
