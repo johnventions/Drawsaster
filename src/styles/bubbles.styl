@@ -34,6 +34,9 @@
     background white
     color black
     margin-bottom 10px
+    max-width 100%
+    img
+        width 100%
     &:after
         content ' '
         width 12px
@@ -50,6 +53,20 @@
         &:after
             background #2d2828
 
+.chat-left
+    text-align left
+    p, h5, .speak-up
+        text-align left
+    .bubble
+        &:after
+            left 20px
+.chat-right
+    text-align right
+    p, h5, .speak-up
+        text-align right
+    .bubble
+        &:after
+            left calc(100% - 32px)
 .notification
     position fixed
     bottom 0

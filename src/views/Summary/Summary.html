@@ -1,21 +1,26 @@
 <main class='container'>
-    <h1>You Did It!</h1>
+    <div class='speak-up'>
+        <div class='bubble bubble-dark'>
+            <h1>You Did It!</h1>
+        </div>
+    </div>
     <select v-model="activeStory" v-on:change="updateStory(activeStory)">
         <option disabled selected v-bind:value="null">Select a story</option>
         <option v-for="story in stories" v-bind:value="story.author">{{ story.contentString }}</option>
     </select>
-    <div v-for="task in activeTasks">
-        <div class='img-container' v-if="task.type == 'drawing'"></template>
-            <img v-bind:src="drawingURL(task._id)">
-        </div>
-        <template v-else>
-            <h3>
-                {{ task.contentString }}
-            </h3>
-        </template>
+    <div v-for="task in activeTasks"
+            v-bind:class=" task.type == 'drawing' ? 'chat-right' : 'chat-left' ">
         <h5>
-            By: {{ authorName(task.author) }}
+            {{ authorName(task.author) }}
         </h5>
+        <div class="speak-up">
+            <div class='bubble' v-if="task.type == 'drawing'">
+                <img v-bind:src="drawingURL(task._id)" >
+            </div>
+            <div v-else class="bubble bubble=dark">
+                {{ task.contentString }}
+            </div>
+        </div>
     </div>
     <router-link to="/" class="btn btn-secondary home-btn">
         New Game

@@ -64,11 +64,11 @@
                 v-on:click="cancelChat()">Back</button>
         </div>
         <div v-show="!chatDrawing">
-            <div class='speak-up'>
-                <div class='bubble bubble-dark' v-if="currentTask == null">
-                    All set for now!<br /> Wait for your next task.
-                </div>
-                <div class='bubble bubble-dark' v-if="currentTask != null">
+            <h3 v-if="currentTask == null">
+                All set for now!<br /> Wait for your next task.
+            </h3>
+            <div class='speak-up' v-if="currentTask != null">
+                <div class='bubble bubble-dark'>
                     💥 Alright! New task is here!
                 </div>
             </div>
