@@ -2,13 +2,12 @@
 <style src="./Game.styl" lang="styl"></style>
 
 <script>
-import shuffle from "@/shuffle";
-
 export default {
 	name: "game",
 	data: () => {
 		return {
 			chatDrawing: false,
+			chatMode: 1, // 1 == view chats, 2 == status
 			gameMode: true,
 			submitting: false,
 			caption: "",
@@ -148,10 +147,12 @@ export default {
 				if ( this.signaturePad().isEmpty() ) {
 					return;
 				}
+			} else if (this.caption.trim() == '') {
+				return;
 			}
 			var data = this.currentTask.type == 'drawing' ? document.querySelector("#signature > canvas").toDataURL() : this.caption;
 			var payload = {
-				task: this.currentTask._id,
+				taskID: this.currentTask._id,
 				content: data,
 				nextPlayer: this.getNextPlayer()
 			};
@@ -199,7 +200,14 @@ export default {
 		chatClass(index) {
 			var m = (this.myChats.length - index) % 2;
 			return m ? "chat-left" : "chat-right";
+		},
+		toggleChat() {
+			this.chatMode = 1;
+		},
+		toggleStatus() {
+			this.chatMode = 2;
 		}
+
 	}
 };
 </script>

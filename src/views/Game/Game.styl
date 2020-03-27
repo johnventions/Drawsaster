@@ -94,3 +94,38 @@
     
 .task .bubble
     min-width 75%
+
+
+button.btn-toggle
+    width 50%
+    display inline-block
+    margin 0
+    padding 0
+    color white
+    background blue
+    &:not(.active)
+        background grey
+    &:first-of-type
+        border-top-right-radius 0
+        border-bottom-right-radius 0
+    &:last-of-type
+        border-top-left-radius 0
+        border-bottom-left-radius 0
+
+
+@keyframes wiggle {
+    0% { transform: rotate(-30deg); }
+   50% { transform: rotate(-10deg); }
+  100% { transform: rotate(-30deg); }
+}
+
+.wiggle {
+  display: inline-block;
+  animation: wiggle 1.5s infinite;
+}
+
+.player-list
+    text-align center
+    margin-top 15px
+    > div
+        padding 5px 0

@@ -31,11 +31,15 @@ export default {
 			this.$store.commit('ADD_CHAT', chat );
 		});
 
+		this.sockets.subscribe("GAME_UPDATE", update => {
+			this.$store.commit('GAME_UPDATE', update );
+		});
+
 		//reconnect logic
 		this.$socket.on("reconnect", function() {
 			console.log("Reconnected!");
 			if (this.app_gamecode) {
-				this.joinRoom(this.app_gamecode, this.app_userid);
+				this.joinRoom(this.app_gameid, this.app_userid);
 			}
 		}.bind(this));
 

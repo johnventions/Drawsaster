@@ -3,6 +3,7 @@
 
 <script>
 // @ is an alias to /src
+import { mapState } from 'vuex'
 import CookieService from "@/cookies.js";
 
 export default {
@@ -16,11 +17,14 @@ export default {
 	components: {
 
 	},
-	computed: {
+	computed: mapState({
+		players: (state) => {
+			return state.players;
+		},
 		shareURL: function() {
 			return window.location.origin + "/join?code=" + this.app_gamecode;
 		}
-	},
+	}),
 	mounted: function() {
 		CookieService.setCookie("code", this.app_gamecode, 7);
 		CookieService.setCookie("user", this.app_username, 7);
@@ -34,14 +38,11 @@ export default {
 		status: function() {
 			return this.$store.getters.status;
 		},
-		players: function() {
-			return this.$store.getters.players;
-		},
 		displayStart: function() {
 			if (!this.isAdmin()) {
 				return false;
 			}
-			if (this.$settings.minPlayers <= this.players().length) {
+			if (this.players && this.$settings.minPlayers <= this.players.length) {
 				return true;
 			}
 			return false;

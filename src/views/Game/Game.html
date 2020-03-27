@@ -75,16 +75,40 @@
             <button v-if="currentTask != null"
                     class='btn btn-primary' 
                     v-on:click="startNext()"> Next Task</button>
-            <button id="startChatButton" class='btn btn-secondary' 
-                v-on:click="addChat()">Chat</button>
-            <div class="chatList">
-                <div v-for="(chat, index) in myChats" 
-                    v-bind:class="chatClass(index)"
-                    class='speak-up'>
-                    <p>{{ authorName(chat.player) }}:</p>
-                    <div class='bubble'>
-                        <img v-bind:src="idToImage(chat.drawing)">
+            <div>
+                <button class='btn btn-toggle'
+                    v-bind:class="{ active: (chatMode == 1 )}"
+                    v-on:click="toggleChat()">
+                    Chat
+                </button>
+                <button class='btn btn-toggle'
+                    v-bind:class="{ active: (chatMode == 2 )}"
+                    v-on:click="toggleStatus()">
+                    Status
+                </button>
+            </div>
+            <div v-show="chatMode == 1">
+                <button id="startChatButton" class='btn btn-secondary' 
+                                v-on:click="addChat()">
+                                New Chat
+                </button>
+                <div class="chatList">
+                    <div v-for="(chat, index) in myChats" 
+                        v-bind:class="chatClass(index)"
+                        class='speak-up'>
+                        <p>{{ authorName(chat.player) }}:</p>
+                        <div class='bubble'>
+                            <img v-bind:src="idToImage(chat.drawing)">
+                        </div>
                     </div>
+                </div>
+            </div>
+            <div v-show="chatMode == 2" class="player-list">
+                <div v-for="(player, index) in app_players">
+                    {{ player.name }}
+                    <span class="wiggle" v-if="player.taskCount && player.taskCount > 0">
+                    ✏️
+                    </span>
                 </div>
             </div>
         </div>

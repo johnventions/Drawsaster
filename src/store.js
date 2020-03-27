@@ -73,6 +73,13 @@ export default new Vuex.Store({
 				}, 5000);
 			}
 		},
+		GAME_UPDATE(state, update) {
+			state.players.forEach((player) => {
+				if (update[player._id] != null) {
+					player.taskCount = update[player._id];
+				}
+			});
+		},
 		ADD_CHAT(state, payload) {
 			state.chats.push(payload);
 		},

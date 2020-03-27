@@ -17,7 +17,6 @@ var server = app.listen(process.env.PORT || 5050, function () {
 const db = require('./server/db')(mongoose, session);
 const io = require("./server/sockets.js")(server);
 
-const apiRoutes = require('./server/api/routes')(db, io);
 // const drawingRoutes = require('./server/api/drawing.routes')(db, io);
 
 
@@ -34,6 +33,8 @@ app.use(session({
 }));
 
 app.use(express.static('dist'));
+
+const apiRoutes = require('./server/api/routes')(db, io);
 
 app.use('/api', apiRoutes);
 app.use('/api/drawings', express.static('drawings'));

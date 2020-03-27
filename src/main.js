@@ -51,8 +51,8 @@ Vue.mixin({
 		}
 	},
 	methods: {
-		joinRoom: function(code, playerid) {
-			this.$socket.emit('Join', code);
+		joinRoom: function(gameID, playerid) {
+			this.$socket.emit('Join', gameID);
 			this.$socket.emit('Join', playerid);
 		},
 		getPlayersBegin: function () {

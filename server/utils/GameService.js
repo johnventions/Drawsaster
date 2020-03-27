@@ -6,14 +6,14 @@ var mongoose = require("mongoose");
 
 const alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-function makecode() {
+const makecode = () => {
     var code = "";
     for (var i = 0; i < 4; i++)
         code += alpha.charAt(Math.floor(Math.random() * alpha.length));
     return code;
 }
 
-
+const nameSanitize = (name) => name.trim().toLowerCase();
 
 function nextStep(prevTask) {
     if (prevTask == null) {
@@ -61,7 +61,7 @@ module.exports = {
             createDate: Date.now(),
             started: false,
             completed: false,
-            players: 0
+            players: []
         });
         return g;
     },
@@ -73,13 +73,14 @@ module.exports = {
         var p = new Player({
             _id: new mongoose.Types.ObjectId,
             createDate: Date.now(),
-            name: name,
+            name: name.trim(),
+            nameLower: nameSanitize(name),
             game: game._id,
             playOrder: Math.floor(Math.random() * 100),
             admin: admin
         });
         return p.save().then( function() {
-            game.players++;
+            game.players.push(p._id);
             return p;
         });
     },
@@ -110,7 +111,8 @@ module.exports = {
     /** @param {id} gameID */
     /** @param {string} name */
     FindPlayer: async function(gameID, name) {
-        return Player.findOne({game: gameID, name: name}, function(err, p) {
+        const nameLower = nameSanitize(name);
+        return Player.findOne({ game: gameID, nameLower: nameLower}, function(err, p) {
             if (err) {
                 return null;
             }
@@ -176,7 +178,7 @@ module.exports = {
         game.started = true;
         game.save();
         //create a task for each player
-        players.forEach( (player, i) => {
+        players.forEach( (player) => {
             this.CreateTask(game._id, null, player._id);
         });
     },
@@ -212,20 +214,33 @@ module.exports = {
             prompt: getPrompt(prevTask),
             completed: 0,
         });
-        t.save();
+        await t.save();
         this.io.to(playerID).emit("NEW_TASK", t);
         return t;
     },
 
-    CompleteChain: function (game, prevTask) {
+    SendUpdate: async function(gameID, players) {
+        const openTasks = await Task.find({ game: gameID, completed: 0 }, (err, tasks) => {
+            return tasks;
+        });
+        if (openTasks && openTasks.length > 0) {
+            const tasksByPlayer = {};
+            players.forEach((playerID) => {
+                tasksByPlayer[playerID] = openTasks.filter( x => x.author == playerID).length;
+            });
+            this.io.to(gameID).emit("GAME_UPDATE", tasksByPlayer);
+        }
+    },
+
+    CompleteChain: function (game) {
         //check if there are any open tasks
         Task.find({game: game._id, completed: 1}, '_id', (err, tasks) => {
             // if there are the correct number of completed tasks
-            if (tasks.length == (game.players * game.players)) {
+            const playerCount = game.players.length;
+            if (tasks.length == (playerCount * playerCount)) {
                 game.completed = true;
                 console.log("Ending " + game.code);
-                this.io.to(game.code).emit("END_GAME", game._id);
-            } else {
+                this.io.to(game._id).emit("END_GAME", game._id);
             }
         });
     },
@@ -235,7 +250,9 @@ module.exports = {
             _id = mongoose.Types.ObjectId();
         }
         fs.writeFile("./drawings/" + _id + ".png", b64, 'base64', function (err) {
-
+            if (err) {
+                console.log(err);
+            }
         });
         return _id;
     },

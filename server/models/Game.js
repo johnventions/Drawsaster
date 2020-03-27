@@ -7,7 +7,7 @@ var gameSchema = new Schema({
     code: String,
     started: Boolean,
     completed: Boolean,
-    players: Number
+    players: [String]
 });
 
 var Game = mongoose.model('Game', gameSchema);

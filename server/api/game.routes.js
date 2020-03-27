@@ -26,8 +26,8 @@ module.exports = function (db, io) {
     });
 
     routes.post("/join/:gamecode", async function (req, res) {
-        var name = req.body.user;
-        var code = req.params.gamecode.toUpperCase();
+        const name = req.body.user;
+        const code = req.params.gamecode.toUpperCase();
         var game = await GameService.FindGame(code);
         if (game == null) {
             return res.status(400).json({
@@ -54,7 +54,7 @@ module.exports = function (db, io) {
             tasks = await GameService.FindOpenUserTasks(game._id, newplayer._id);
         }
         game.save();
-        io.to(code).emit("NEW_PLAYER", players);
+        io.to(game._id).emit("NEW_PLAYER", players);
         return res.status(200).json({
             success: true,
             game: GameService.GetGameData(game),
@@ -102,13 +102,13 @@ module.exports = function (db, io) {
 
     routes.post("/:gameid/submit", async function (req, res) {
         var id = req.params.gameid;
-        var taskID = req.body.task;
-        var content = req.body.content;
-        var nextPlayer = req.body.nextPlayer;
+        const { taskID, content, nextPlayer } = req.body;
         //find game to start
         var game = await GameService.FindGameById(id);
         if (game == null) {
-            
+            return res.status(404).json({
+                success: false,
+            });
         }
         var task = await GameService.FindTask(taskID);
         if (task == null) {
@@ -129,6 +129,7 @@ module.exports = function (db, io) {
             game.save();
             console.log("Finished chain");
         }
+        GameService.SendUpdate(game._id, game.players);
         return res.status(200).json({
             success: true,
         });
@@ -160,7 +161,7 @@ module.exports = function (db, io) {
         //save file
         const b64 = content.split("base64,")[1];
         var dwg = GameService.SaveDrawing(b64, null);
-        GameService.SendChat(game.code, dwg, player);
+        GameService.SendChat(game._id, dwg, player);
         return res.status(200).json({
             success: true,
             drawing: dwg
