@@ -76,7 +76,9 @@ export function apiRoutes(service: GameService): express.Router {
 	router.get('/images/*key', async (req, res) => {
 		const key = (req.params as { key: string[] }).key.join('/');
 		if (!isValidKey(key) || !key.endsWith('.png')) throw new GameError('Not found', 404);
-		const url = await service.store.readUrl(key);
+		// ?inline=1 always sends the bytes from this origin, so the browser can draw the
+		// image on a canvas and export it (a redirect to S3 would make the canvas unexportable)
+		const url = req.query.inline === '1' ? null : await service.store.readUrl(key);
 		if (url) {
 			res.set('Cache-Control', 'private, max-age=600').redirect(302, url);
 			return;

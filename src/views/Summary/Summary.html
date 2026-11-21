@@ -9,24 +9,74 @@
         <option disabled v-bind:value="null">Select a story</option>
         <option v-for="story in stories" v-bind:value="story.index" :key="story.index">{{ story.label }}</option>
     </select>
-    <div v-for="(step, index) in activeSteps" :key="index"
-            v-bind:class=" step.type == 'drawing' ? 'chat-right' : 'chat-left' ">
+    <p v-if="rows.length && !hintSeen" class="snapshot-hint">📸 Tap a step to snapshot it</p>
+    <div v-for="(row, index) in rows" :key="index"
+            class="story-step"
+            v-bind:class="[row.step.type == 'drawing' ? 'chat-right' : 'chat-left', { selectable: row.playIndex != null, selected: isSelected(row) }]"
+            v-on:click="toggleSelect(row)">
         <h5>
-            {{ authorName(step.authorId) }}
+            {{ authorName(row.step.authorId) }}
         </h5>
         <div class="speak-up">
-            <div v-if="step.skipped" class="bubble skipped">
+            <div v-if="row.step.skipped" class="bubble skipped">
                 (skipped)
             </div>
-            <div class='bubble' v-else-if="step.image">
-                <img v-bind:src="step.image">
+            <div class='bubble' v-else-if="row.step.image">
+                <img v-bind:src="row.step.image">
             </div>
             <div v-else class="bubble bubble-dark">
-                {{ step.text }}
+                {{ row.step.text }}
             </div>
         </div>
     </div>
     <router-link to="/" class="btn btn-secondary home-btn">
         New Game
     </router-link>
+
+    <div v-if="selected != null && !snapshotOpen" class="snapshot-bar">
+        <span>📸 Snapshot these 2</span>
+        <button class="bar-open" v-on:click="openSnapshot()">Open</button>
+        <button class="bar-clear" aria-label="Clear selection" v-on:click="clearSelection()">✕</button>
+    </div>
+
+    <div v-if="snapshotOpen" class="snapshot-overlay" v-on:click.self="closeSnapshot()">
+        <div class="snapshot-sheet" role="dialog" aria-label="Snapshot">
+            <div class="sheet-header">
+                <span>Snapshot</span>
+                <button class="bar-clear" aria-label="Close" v-on:click="closeSnapshot()">✕</button>
+            </div>
+            <div class="snapshot-preview">
+                <img v-if="previewUrl" v-bind:src="previewUrl" v-bind:class="{ stale: rendering }" alt="Snapshot preview">
+                <p v-else class="preview-loading">Making your snapshot…</p>
+            </div>
+            <p v-if="snapshotError" class="error">{{ snapshotError }}</p>
+
+            <div class="option-row">
+                <span class="option-label">Steps</span>
+                <div class="segmented">
+                    <button v-for="opt in [['pair', 'This pair'], ['prev', '+ Before'], ['next', '+ After'], ['all', 'Whole story']]"
+                            :key="opt[0]"
+                            v-bind:class="{ on: snapshot.range == opt[0] }"
+                            v-on:click="snapshot.range = opt[0]">{{ opt[1] }}</button>
+                </div>
+            </div>
+            <div class="option-row">
+                <span class="option-label">Style</span>
+                <div class="segmented">
+                    <button v-bind:class="{ on: snapshot.style == 'purple' }" v-on:click="snapshot.style = 'purple'">Purple</button>
+                    <button v-bind:class="{ on: snapshot.style == 'white' }" v-on:click="snapshot.style = 'white'">White</button>
+                </div>
+            </div>
+            <div class="option-row">
+                <span class="option-label">Show</span>
+                <label class="check"><input type="checkbox" v-model="snapshot.names"> Names</label>
+                <label class="check"><input type="checkbox" v-model="snapshot.footer"> drawsaster.com</label>
+            </div>
+
+            <div class="sheet-actions">
+                <button class="btn btn-primary" v-bind:disabled="!previewUrl || rendering" v-on:click="download()">Download</button>
+                <button v-if="canShare" class="btn btn-secondary" v-bind:disabled="!previewBlob || rendering" v-on:click="share()">Share</button>
+            </div>
+        </div>
+    </div>
 </main>
