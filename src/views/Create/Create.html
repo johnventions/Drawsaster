@@ -3,9 +3,10 @@
     <label>
         Your Name:
     </label>
-    <input name="user" v-model="user" v-on:keyup.enter="create">
+    <input name="user" v-model="user" maxlength="24" v-on:keyup.enter="create">
+    <p v-if="error" class="error">{{ error }}</p>
     <button class='btn btn-primary col-12 mt-3' 
-            v-bind:disabled="user == '' || pending" 
+            v-bind:disabled="user.trim() == '' || pending" 
             v-on:click="create()">
         Create
     </button>

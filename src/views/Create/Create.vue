@@ -1,40 +1,30 @@
 <template src="./Create.html"></template>
 
 <script>
-import CookieService from "@/cookies.js";
+import { loadName, saveName } from "@/session";
 
 export default {
 	name: "create",
-	data: () => {
-		return {
-			user: CookieService.getCookie("user") || "",
-			pending: false,
-		};
-	},
-	components: {},
-	mounted: function() {},
+	data: () => ({
+		user: loadName(),
+		pending: false,
+		error: ""
+	}),
 	methods: {
-		create: function() {
-			if (this.pending || this.user.length == 0) return;
+		async create() {
+			if (this.pending || !this.user.trim()) return;
 			this.pending = true;
-			if (this.user != "") {
-				this.$http.post("/api/game", {
-					user: this.user
-				}).then( function(res){
-					this.$store.commit('setup', {player: res.data.player, game: res.data.game, players: res.data.players});
-					this.joinRoom(this.app_gameid, this.app_userid);
-					if ( res.data.game.started ) {
-						this.$router.push("/game");
-					} else {
-						this.$router.push("/lobby");
-					}
-				}.bind(this)
-				).catch( () => {
-					this.pending = false;
-				});
+			this.error = "";
+			try {
+				const { session } = await this.$request("game:create", { name: this.user });
+				saveName(this.user.trim());
+				this.$store.commit("SET_SESSION", session);
+				this.$router.push("/lobby");
+			} catch (err) {
+				this.error = err.message;
+				this.pending = false;
 			}
 		}
 	}
 };
 </script>
-

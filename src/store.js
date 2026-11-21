@@ -1,104 +1,50 @@
 import { createStore } from 'vuex';
+import { loadSession, saveSession } from './session';
 
+/** @typedef {import('../shared/protocol').GameSnapshot} GameSnapshot */
+
+// The server owns the game. The store just keeps the latest snapshot it sent.
 export default createStore({
-	state: {
-		token: '',
-		loggedIn: 0, // bool for logged in
-		user: '',
-		userID: '',
-		code: '',
-		admin: 0,
-		gameID: null,
-		started: false,
-		nextPlayer: null,
-		players: [],
-		queue: [],
-		mySubmissions: [],
+	state: () => ({
+		session: loadSession(),
+		/** @type {GameSnapshot | null} */
+		snapshot: null,
 		chats: [],
 		showAlert: false
+	}),
+	getters: {
+		status: state => ({ loggedIn: !!state.session }),
+		you: state => state.snapshot?.you ?? null,
+		players: state => state.snapshot?.players ?? [],
+		tasks: state => state.snapshot?.tasks ?? []
 	},
 	mutations: {
-		setup(state, payload) {
-			this.commit('SET_LOGIN', payload.player);
-			this.commit('SET_GAME', payload.game);
-			this.commit('SET_PLAYERS', payload.players)
-			this.commit('SET_QUEUE', payload.tasks)
-		},
-		SET_LOGIN(state, player) {
-			state.loggedIn = 1;
-			state.user = player.name;
-			state.userID = player._id;
-			state.admin = player.admin;
-		},
-		SET_GAME(state, game) {
-			state.gameID = game._id;
-			state.started = game.started;
-			state.code = game.code;
-		},
-		SET_PLAYERS(state, players) {
-			state.players = players.sort( function(a, b) {
-				return a.playOrder > b.playOrder ? 1 : -1;
-			});
-			var curPlayer = state.userID;
-			var i = state.players.findIndex( p => {
-				return p._id == curPlayer;
-			});
-			if (i == state.players.length - 1) {
-				this.commit("SET_NEXT_PLAYER", players[0]._id);
-			} else {
-				this.commit("SET_NEXT_PLAYER", players[ i + 1 ]._id);
+		SET_SESSION(state, session) {
+			state.session = session;
+			saveSession(session);
+			if (!session) {
+				state.snapshot = null;
+				state.chats = [];
 			}
 		},
-		SET_NEXT_PLAYER(state, playerID) {
-			state.nextPlayer = playerID;
-		},
-		SET_QUEUE(state, tasks) {
-			state.queue = tasks || [];
-		},
-		ADD_TASK(state, payload) {
-			state.queue.push(payload.task);
-			if (!state.started) {
-				state.started = true;
-				if (payload.callback) {
-					payload.callback();
-				}
-			} else {
+		SET_SNAPSHOT(state, snapshot) {
+			const before = state.snapshot?.tasks.length ?? 0;
+			const wasPlaying = state.snapshot?.phase === 'playing';
+			state.snapshot = snapshot;
+			if (wasPlaying && snapshot.tasks.length > before) {
 				state.showAlert = true;
-				setTimeout( () => {
+				setTimeout(() => {
 					state.showAlert = false;
-					console.log(state.showAlert);
 				}, 5000);
-			}
-		},
-		GAME_UPDATE(state, update) {
-			state.players.forEach((player) => {
-				if (update[player._id] != null) {
-					player.taskCount = update[player._id];
+				if (navigator.vibrate) {
+					navigator.vibrate([150, 100, 150]);
 				}
-			});
-		},
-		ADD_CHAT(state, payload) {
-			state.chats.push(payload);
-		},
-		POP_QUEUE(state) {
-			state.queue.shift();
-		}
-	},
-	getters: {
-		status: state => {
-			return {
-				loggedIn: state.loggedIn,
-				user: state.user,
-				userID: state.userID,
-				code: state.code,
-				admin: state.admin
 			}
 		},
-		players: state => {
-			return state.players;
+		ADD_CHAT(state, chat) {
+			state.chats.push(chat);
+			// chat is temporary: keep only recent drawings in memory
+			if (state.chats.length > 30) state.chats.shift();
 		}
-	},
-	actions: {
-
 	}
-})
+});

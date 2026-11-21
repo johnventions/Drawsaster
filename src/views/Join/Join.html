@@ -3,12 +3,12 @@
     <label>
         Your Name:
     </label>
-    <input name="user" v-model="user">
+    <input name="user" v-model="user" maxlength="24">
     <label>
         Game Code:
     </label>
-    <input name="code" class="code" v-model="code">
-    <p v-if="loginError" class="error">
+    <input name="code" class="code" v-model="code" maxlength="4" v-on:keyup.enter="join">
+    <p v-if="errorMessage" class="error">
         {{ errorMessage }}
     </p>
     <button class='btn btn-primary col-12 mt-3'

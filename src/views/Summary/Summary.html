@@ -4,26 +4,29 @@
             <h1>You Did It!</h1>
         </div>
     </div>
-    <select v-model="activeStory" v-on:change="updateStory(activeStory)">
-        <option disabled selected v-bind:value="null">Select a story</option>
-        <option v-for="story in stories" v-bind:value="story.author" :key="story._id">{{ story.contentString }}</option>
+    <p v-if="error" class="error">{{ error }}</p>
+    <select v-if="summary" v-model="activeChain">
+        <option disabled v-bind:value="null">Select a story</option>
+        <option v-for="story in stories" v-bind:value="story.index" :key="story.index">{{ story.label }}</option>
     </select>
-    <div v-for="task in activeTasks" :key="task._id"
-            v-bind:class=" task.type == 'drawing' ? 'chat-right' : 'chat-left' ">
+    <div v-for="(step, index) in activeSteps" :key="index"
+            v-bind:class=" step.type == 'drawing' ? 'chat-right' : 'chat-left' ">
         <h5>
-            {{ authorName(task.author) }}
+            {{ authorName(step.authorId) }}
         </h5>
         <div class="speak-up">
-            <div class='bubble' v-if="task.type == 'drawing'">
-                <img v-bind:src="drawingURL(task._id)" >
+            <div v-if="step.skipped" class="bubble skipped">
+                (skipped)
+            </div>
+            <div class='bubble' v-else-if="step.image">
+                <img v-bind:src="step.image">
             </div>
             <div v-else class="bubble bubble-dark">
-                {{ task.contentString }}
+                {{ step.text }}
             </div>
         </div>
     </div>
     <router-link to="/" class="btn btn-secondary home-btn">
         New Game
     </router-link>
-    
 </main>

@@ -19,4 +19,7 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
-drawings/
+
+# local image store and env files
+storage/
+.env
