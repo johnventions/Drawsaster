@@ -85,3 +85,20 @@ a:not(.btn) {
 	color: #ffd2d2;
 	font-size: 16px;
 }
+
+// quiet secondary action, e.g. "Leave game"
+.link-btn {
+	display: block;
+	margin: 10px auto;
+	background: none;
+	border: none;
+	color: white;
+	font-size: 16px;
+	text-decoration: underline;
+	opacity: 0.85;
+	cursor: pointer;
+
+	&:hover {
+		opacity: 1;
+	}
+}

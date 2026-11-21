@@ -19,6 +19,8 @@ export interface PlayerView {
 	name: string;
 	isHost: boolean;
 	connected: boolean;
+	/** Left the game for good; their turns are skipped automatically. */
+	left: boolean;
 	/** Steps assigned to this player that are ready to play now. */
 	waiting: number;
 	/** Steps this player has finished (skipped ones are not counted). */
@@ -81,11 +83,14 @@ export interface ClientToServerEvents {
 	'game:start': (ack: Ack) => void;
 	'host:skip': (req: { playerId: string }, ack: Ack) => void;
 	'chat:send': (req: { image: string }, ack: Ack) => void;
+	'game:leave': (ack: Ack) => void;
 }
 
 export interface ServerToClientEvents {
 	'game:state': (snapshot: GameSnapshot) => void;
 	'chat:message': (message: ChatMessage) => void;
+	/** This player left the game (for example from another tab); forget the session. */
+	'session:ended': () => void;
 }
 
 // HTTP API

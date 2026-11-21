@@ -175,3 +175,50 @@ test('snapshot hides other players tokens and reports progress', () => {
 	assert.ok(!JSON.stringify(snap).includes(players[0]!.token));
 	assert.deepEqual(snap.progress, { done: 0, total: 9 });
 });
+
+test('leaving the lobby removes the player and hands over host', () => {
+	const game = new Game({ code: 'TEST', minPlayers: 3 });
+	const host = game.addPlayer('Host');
+	const b = game.addPlayer('B');
+	game.addPlayer('C');
+	const result = game.leave(host.id);
+	assert.equal(result.empty, false);
+	assert.equal(game.players.has(host.id), false);
+	assert.equal(game.hostId, b.id);
+	// the name is free again
+	game.addPlayer('Host');
+	assert.equal(game.players.size, 3);
+});
+
+test('the last player leaving empties the game', () => {
+	const game = new Game({ code: 'TEST', minPlayers: 3 });
+	const only = game.addPlayer('Solo');
+	assert.equal(game.leave(only.id).empty, true);
+	assert.equal(game.hostId, null);
+});
+
+test('leaving mid-game skips all of that player\'s turns and the game still finishes', () => {
+	const { game, players } = setup(4);
+	const [host, b, c, quitter] = players.map(p => p.id);
+	const { socketIds } = game.leave(quitter!);
+	assert.deepEqual(socketIds, []);
+	assert.equal(game.tasksFor(quitter!).length, 0, 'their ready turn is skipped at once');
+	// the others play; the quitter's later turns are skipped as they come up
+	playAll(game, [host!, b!, c!]);
+	assert.equal(game.phase, 'done');
+	const theirs = game.chains.flatMap(ch => ch.steps).filter(s => s.authorId === quitter);
+	assert.equal(theirs.length, 4);
+	assert.ok(theirs.every(s => s.skipped));
+	// they can no longer use their token, and others see them as left
+	assert.equal(game.playerByToken(players[3]!.token), undefined);
+	assert.equal(game.snapshotFor(host!).players.find(p => p.id === quitter)!.left, true);
+});
+
+test('host leaving mid-game passes host to a connected player', () => {
+	const { game, players } = setup(3);
+	const [host, b, c] = players.map(p => p.id);
+	game.addSocket(c!, 'socket-c');
+	game.leave(host!);
+	assert.equal(game.hostId, c, 'connected player is preferred');
+	assert.doesNotThrow(() => game.skip(c!, b!));
+});

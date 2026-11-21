@@ -17,10 +17,11 @@ export default {
 		phase(phase) {
 			// Create/Join route themselves once they have saved the session
 			if (!this.$store.state.session) return;
+			// Create/Join never redirect: they may be starting a new game while an old one is still saved
 			const route = this.$route.name;
-			if (phase === 'lobby' && ['create', 'join', 'game'].includes(route)) {
+			if (phase === 'lobby' && route === 'game') {
 				this.$router.push('/lobby');
-			} else if (phase === 'playing' && ['create', 'join', 'lobby'].includes(route)) {
+			} else if (phase === 'playing' && route === 'lobby') {
 				this.$router.push('/game');
 			} else if (phase === 'done') {
 				const gameId = this.$store.state.snapshot.gameId;
@@ -33,7 +34,12 @@ export default {
 		this.handlers = {
 			connect: () => this.resume(),
 			'game:state': snapshot => this.$store.commit('SET_SNAPSHOT', snapshot),
-			'chat:message': chat => this.$store.commit('ADD_CHAT', chat)
+			'chat:message': chat => this.$store.commit('ADD_CHAT', chat),
+			// this player left from another tab or device
+			'session:ended': () => {
+				this.$store.commit('SET_SESSION', null);
+				if (this.$route.meta.requiresAuth) this.$router.push('/');
+			}
 		};
 		for (const [event, handler] of Object.entries(this.handlers)) {
 			this.$socket.on(event, handler);

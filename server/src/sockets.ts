@@ -109,6 +109,25 @@ export function registerSockets(io: IO, service: GameService): void {
 			return {};
 		}));
 
+		// Leave for good: every tab of this player is detached, and the game carries on without them.
+		socket.on('game:leave', (ack) => handle(ack, async () => {
+			const { game, player } = current();
+			const { socketIds, empty } = game.leave(player.id);
+			for (const id of socketIds) {
+				const other = io.sockets.sockets.get(id) as GameSocket | undefined;
+				if (!other) continue;
+				other.data = {};
+				await other.leave(roomFor(game));
+				if (other !== socket) other.emit('session:ended');
+			}
+			if (empty) {
+				service.games.delete(game.code);
+			} else {
+				await service.changed(game);
+			}
+			return {};
+		}));
+
 		socket.on('disconnect', () => {
 			const game = socket.data.code ? service.games.get(socket.data.code) : undefined;
 			const player = game && socket.data.playerId ? game.players.get(socket.data.playerId) : undefined;

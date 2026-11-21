@@ -28,5 +28,6 @@
         Waiting for the host to start
     </p>
     <p v-if="error" class="error">{{ error }}</p>
+    <button class="link-btn" v-on:click="leave()">Leave game</button>
     <textarea id="shareURL" ref="shareURL" readonly v-on:click="share()">{{ shareURL }}</textarea>
 </main>

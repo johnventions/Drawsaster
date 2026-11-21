@@ -3,6 +3,7 @@
 
 <script>
 import { mapGetters } from "vuex";
+import { leaveGame } from "@/leave";
 
 export default {
 	name: "lobby",
@@ -26,6 +27,9 @@ export default {
 		}
 	},
 	methods: {
+		leave() {
+			leaveGame(this);
+		},
 		async startGame() {
 			this.pending = true;
 			this.error = "";

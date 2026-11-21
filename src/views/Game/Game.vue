@@ -4,6 +4,7 @@
 <script>
 import { mapGetters } from "vuex";
 import { dataUrlToBlob, submitStep } from "@/api";
+import { leaveGame } from "@/leave";
 
 export default {
 	name: "game",
@@ -142,6 +143,9 @@ export default {
 			} catch (err) {
 				alert(err.message);
 			}
+		},
+		leave() {
+			leaveGame(this);
 		},
 		async skip(player) {
 			if (!confirm(`Skip ${player.name}'s turn? Their next step will be passed on without them.`)) return;

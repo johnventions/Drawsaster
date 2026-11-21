@@ -38,6 +38,10 @@ export class GameStore {
 		return undefined;
 	}
 
+	delete(code: string): void {
+		this.byCode.delete(code);
+	}
+
 	/** Drop idle and long-finished games. Returns the codes removed. */
 	sweep(now = Date.now()): string[] {
 		const removed: string[] = [];
