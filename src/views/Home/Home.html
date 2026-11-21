@@ -3,9 +3,12 @@
     <p>
         A telephone-style drawing game for 3 or more players
     </p>
-    <router-link v-if="session" :to="resumePath" class="btn btn-primary col-12 col-md-3">
-        Back to game {{ session.code }}
-    </router-link>
+    <div v-if="session" class="current-game">
+        <router-link :to="resumePath" class="btn btn-primary col-12 col-md-3">
+            Back to game {{ session.code }}
+        </router-link>
+        <button class="link-btn" v-on:click="leave()">Leave game {{ session.code }}</button>
+    </div>
     <router-link to="/join" class="btn btn-primary col-12 col-md-3">
         Join Game
     </router-link>

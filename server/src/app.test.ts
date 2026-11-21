@@ -185,6 +185,19 @@ test('reconnecting, skipping an absent player, and chat relay', async () => {
 	await host.until(s => s.players.find(p => p.id === cId)!.waiting === 0);
 	assert.equal((await b.socket.emitWithAck('host:skip', { playerId: cId })).ok, false);
 
+	// leaving: every tab of that player is told, the others see them as left, and the token stops working
+	const cOtherTab = new Client();
+	assert.ok((await cOtherTab.socket.emitWithAck('session:resume', c.session)).ok);
+	let ended = false;
+	cOtherTab.socket.on('session:ended', () => { ended = true; });
+	assert.ok((await c2.socket.emitWithAck('game:leave')).ok);
+	await host.until(s => s.players.find(p => p.id === cId)!.left);
+	assert.equal(host.state!.players.find(p => p.id === cId)!.connected, false);
+	await new Promise(resolve => setTimeout(resolve, 100));
+	assert.ok(ended, 'the other tab is told the session ended');
+	assert.equal((await new Client().socket.emitWithAck('session:resume', c.session)).ok, false);
+	assert.equal((await c2.socket.emitWithAck('game:start')).ok, false, 'a socket that left is not in a game');
+
 	// chat is relayed to everyone in the game and not stored
 	const image = 'data:image/png;base64,' + PNG.toString('base64');
 	assert.ok((await b.socket.emitWithAck('chat:send', { image })).ok);

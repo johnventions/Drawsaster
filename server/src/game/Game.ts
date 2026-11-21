@@ -26,6 +26,8 @@ export interface Player {
 	socketIds: Set<string>;
 	seat: number | null;
 	completed: number;
+	/** Left a started game: their turns are skipped automatically and their token no longer works. */
+	left: boolean;
 }
 
 export interface Step {
@@ -105,7 +107,8 @@ export class Game {
 			token: randomBytes(24).toString('base64url'),
 			socketIds: new Set(),
 			seat: null,
-			completed: 0
+			completed: 0,
+			left: false
 		};
 		this.players.set(player.id, player);
 		this.hostId ??= player.id;
@@ -115,9 +118,34 @@ export class Game {
 
 	playerByToken(token: string): Player | undefined {
 		for (const p of this.players.values()) {
-			if (p.token === token) return p;
+			if (p.token === token && !p.left) return p;
 		}
 		return undefined;
+	}
+
+	/**
+	 * A player leaves for good. In the lobby they are removed; in a started game
+	 * they stay in the results, but every turn of theirs is skipped automatically
+	 * so the game can still finish. The host role passes to someone still here.
+	 * Returns the sockets that were theirs, and whether anyone is left.
+	 */
+	leave(playerId: string): { socketIds: string[]; empty: boolean } {
+		const player = this.requirePlayer(playerId);
+		const socketIds = [...player.socketIds];
+		player.socketIds.clear();
+		if (this.phase === 'lobby') {
+			this.players.delete(playerId);
+		} else {
+			player.left = true;
+		}
+		if (this.hostId === playerId) {
+			this.hostId = this.nextHost();
+		}
+		if (this.phase === 'playing') {
+			this.afterStep();
+		}
+		this.touch();
+		return { socketIds, empty: this.activePlayers().length === 0 };
 	}
 
 	addSocket(playerId: string, socketId: string): void {
@@ -229,14 +257,7 @@ export class Game {
 		if (this.phase !== 'playing') throw new GameError('The game is not in progress', 409);
 		const task = this.tasksFor(targetId)[0];
 		if (!task) throw new GameError('That player has nothing to skip', 409);
-		this.chains[task.chain]!.steps.push({
-			type: task.type,
-			authorId: targetId,
-			skipped: true,
-			text: null,
-			imageKey: null,
-			at: this.now()
-		});
+		this.pushSkip(task, targetId);
 		this.afterStep();
 	}
 
@@ -283,7 +304,44 @@ export class Game {
 
 	// ---- internals -----------------------------------------------------
 
+	private pushSkip(task: TaskView, playerId: string): void {
+		this.chains[task.chain]!.steps.push({
+			type: task.type,
+			authorId: playerId,
+			skipped: true,
+			text: null,
+			imageKey: null,
+			at: this.now()
+		});
+	}
+
+	/** Skip every ready turn of players who left; skipping one can make another ready. */
+	private skipLeftPlayers(): void {
+		let skipped = true;
+		while (skipped) {
+			skipped = false;
+			for (const p of this.players.values()) {
+				if (!p.left) continue;
+				for (const task of this.tasksFor(p.id)) {
+					this.pushSkip(task, p.id);
+					skipped = true;
+				}
+			}
+		}
+	}
+
+	private activePlayers(): Player[] {
+		return this.orderedPlayers().filter(p => !p.left);
+	}
+
+	/** Prefer someone who is connected, then anyone still in the game. */
+	private nextHost(): string | null {
+		const active = this.activePlayers();
+		return (active.find(p => p.socketIds.size > 0) ?? active[0])?.id ?? null;
+	}
+
 	private afterStep(): void {
+		if (this.phase === 'playing') this.skipLeftPlayers();
 		const n = this.seats.length;
 		if (this.chains.every(c => c.steps.length === n)) {
 			this.phase = 'done';
@@ -310,6 +368,7 @@ export class Game {
 			name: p.name,
 			isHost: p.id === this.hostId,
 			connected: p.socketIds.size > 0,
+			left: p.left,
 			waiting: this.tasksFor(p.id).length,
 			completed: p.completed
 		};

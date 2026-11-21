@@ -56,6 +56,7 @@
         <button class='btn btn-primary' v-bind:disabled="submitting" v-on:click="submit()">
             {{ submitting ? 'Sending…' : 'Submit' }}
         </button>
+        <button class="link-btn" v-on:click="leave()">Leave game</button>
     </div>
     <div class='limbo' v-if="currentTask == null || !gameMode">
         <div v-if="chatDrawing">
@@ -111,12 +112,14 @@
                 </div>
             </div>
             <div v-show="chatMode == 2" class="player-list">
+                <button class="link-btn leave-btn" v-on:click="leave()">Leave game</button>
                 <div v-for="player in players" :key="player.id" class="player-row">
                     <span class="player-name">
                         {{ player.name }}
-                        <span v-if="!player.connected" class="away">(away)</span>
+                        <span v-if="player.left" class="away">(left)</span>
+                        <span v-else-if="!player.connected" class="away">(away)</span>
                     </span>
-                    <span class="player-waiting">
+                    <span class="player-waiting" v-if="!player.left">
                         <span class="wiggle" v-if="player.waiting > 0">✏️</span>
                         {{ player.waiting > 0 ? player.waiting + ' waiting' : 'done for now' }}
                     </span>

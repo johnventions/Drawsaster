@@ -2,6 +2,8 @@
 <style src="./Home.scss" lang="scss"></style>
 
 <script>
+import { leaveGame } from "@/leave";
+
 export default {
 	name: "home",
 	computed: {
@@ -10,6 +12,11 @@ export default {
 		},
 		resumePath() {
 			return this.$store.state.snapshot?.phase === "playing" ? "/game" : "/lobby";
+		}
+	},
+	methods: {
+		leave() {
+			leaveGame(this);
 		}
 	}
 };
