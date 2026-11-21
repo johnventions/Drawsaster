@@ -1,43 +1,44 @@
 {
-  "name": "vue-socket-game",
-  "version": "0.1.0",
+  "name": "drawsaster",
+  "version": "0.2.0",
   "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.11.0"
+  },
   "scripts": {
-    "start": "vue-cli-service build && node ./server.js",
-    "build": "vue-cli-service build",
-    "lint": "vue-cli-service lint",
-    "dev": "vue-cli-service serve | nodemon ./server.js",
-    "vue": "vue-cli-service serve"
+    "dev": "concurrently -n web,api -c magenta,cyan \"vite\" \"npm:server:dev\"",
+    "vite": "vite",
+    "server:dev": "node --watch --env-file-if-exists=.env server/src/index.ts --port=5050",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node --env-file-if-exists=.env server/src/index.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "node --test \"server/**/*.test.ts\"",
+    "lint": "eslint src"
   },
   "dependencies": {
-    "axios": "^0.19.2",
-    "connect-mongo": "^3.2.0",
-    "cookie-parser": "^1.4.5",
-    "core-js": "^2.6.11",
-    "express-session": "^1.17.0",
-    "language-stylus": "^3.2.0",
-    "mongoose": "^5.7.5",
-    "nodemon": "^1.19.4",
-    "signature_pad": "^3.0.0-beta.3",
-    "socket.io": "^2.3.0",
-    "socket.io-client": "^2.3.0",
-    "vue": "^2.6.11",
-    "vue-router": "^3.1.6",
-    "vue-signature-pad": "^1.1.18",
-    "vue-socket.io": "^3.0.7",
-    "vuex": "^3.1.3"
+    "@aws-sdk/client-s3": "^3.1175.0",
+    "@aws-sdk/s3-request-presigner": "^3.1175.0",
+    "express": "^5.3.0",
+    "signature_pad": "^5.1.1",
+    "socket.io": "^4.8.4",
+    "socket.io-client": "^4.8.4",
+    "vue": "^3.5.22",
+    "vue-router": "^4.6.3",
+    "vuex": "^4.1.0"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.12.1",
-    "@vue/cli-plugin-eslint": "^3.12.1",
-    "@vue/cli-service": "^3.12.1",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^5.16.0",
-    "eslint-plugin-vue": "^5.0.0",
-    "style-resources-loader": "^1.3.3",
-    "stylus": "^0.54.7",
-    "stylus-loader": "^3.0.2",
-    "vue-cli-plugin-style-resources-loader": "^0.1.4",
-    "vue-template-compiler": "^2.6.11"
+    "@eslint/js": "^9.39.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.19.2",
+    "@vitejs/plugin-vue": "^6.0.11",
+    "concurrently": "^9.2.1",
+    "eslint": "^9.39.0",
+    "eslint-plugin-vue": "^10.5.0",
+    "globals": "^16.5.0",
+    "sass": "^1.93.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.0.0"
   }
 }

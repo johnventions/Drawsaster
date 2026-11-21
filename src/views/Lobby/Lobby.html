@@ -1,11 +1,13 @@
 <main class='lobby container'>
     <h1>Waiting to begin</h1>
     <p>
-        Game Code: {{ status().code }}
-        <template v-if="players && players.length > 1">
-            <br/>{{ players.length }} Players
-            <div v-for="player in players">
+        Game Code: {{ code }}
+        <template v-if="players.length > 0">
+            <br/>{{ players.length }} {{ players.length == 1 ? 'Player' : 'Players' }}
+            <div v-for="player in players" :key="player.id">
                 {{ player.name }}
+                <span v-if="player.isHost" title="Host">👑</span>
+                <span v-if="!player.connected" class="away">(away)</span>
             </div>
         </template>
     </p>
@@ -14,9 +16,17 @@
         Invite Friends
     </button>
     <button class='btn btn-primary' 
-            v-if="displayStart()" 
+            v-if="canStart"
+            v-bind:disabled="pending"
             v-on:click="startGame()">
         Start
     </button>
-    <textarea id="shareURL" v-on:click="share()">{{ shareURL }}</textarea>
+    <p v-else-if="you && you.isHost" class="hint">
+        You need at least {{ minPlayers }} players to start
+    </p>
+    <p v-else class="hint">
+        Waiting for the host to start
+    </p>
+    <p v-if="error" class="error">{{ error }}</p>
+    <textarea id="shareURL" ref="shareURL" readonly v-on:click="share()">{{ shareURL }}</textarea>
 </main>

@@ -1,19 +1,16 @@
 <template src="./Home.html"></template>
-<style src="./Home.styl" lang="styl"></style>
+<style src="./Home.scss" lang="scss"></style>
 
 <script>
-// @ is an alias to /src
-//import HelloWorld from "@/components/HelloWorld.vue";
 export default {
 	name: "home",
-	data: () => {
-		return {};
-	},
-	components: {},
-	mounted: function() {
-	},
-	methods: {
+	computed: {
+		session() {
+			return this.$store.state.session;
+		},
+		resumePath() {
+			return this.$store.state.snapshot?.phase === "playing" ? "/game" : "/lobby";
+		}
 	}
 };
 </script>
-

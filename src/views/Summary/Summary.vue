@@ -1,58 +1,45 @@
 <template src="./Summary.html"></template>
-<style src="./Summary.styl" lang="styl" scoped></style>
+<style src="./Summary.scss" lang="scss" scoped></style>
 <script>
-// @ is an alias to /src
+import { fetchSummary } from "@/api";
+
+/** @typedef {import('../../../shared/protocol').GameSummary} GameSummary */
 
 export default {
-	name: "ending",
-	data: () => {
-		return {
-			tasks: [],
-			activeStory: null,
-			activeTasks: []
-		};
-	},
-	components: {
-
-	},
+	name: "game-summary",
+	data: () => ({
+		/** @type {GameSummary | null} */
+		summary: null,
+		error: "",
+		activeChain: null
+	}),
 	computed: {
 		stories() {
-			return this.tasks.filter( function(x) {
-				return x.chain.length == 1;
-			})
+			if (!this.summary) return [];
+			return this.summary.chains.map((chain, index) => {
+				const first = chain.steps.find(s => !s.skipped && s.text);
+				return { index, label: first ? first.text : `${this.authorName(chain.ownerId)}'s story` };
+			});
+		},
+		activeSteps() {
+			if (this.activeChain == null || !this.summary) return [];
+			return this.summary.chains[this.activeChain].steps;
 		}
 	},
-	mounted: function() {
-		this.loadTasks();
+	mounted() {
+		this.load();
 	},
 	methods: {
-		authorName: function(id) {
-			var p = this.app_players.find( (x) => {
-				return x._id == id;
-			});
-			return p ? p.name : "--";
+		authorName(id) {
+			return this.summary?.players.find(p => p.id === id)?.name ?? "--";
 		},
-		updateStory(task) {
-			if (this.tasks != null) {
-				this.activeTasks = this.tasks.filter( (v) => {
-					return v.chain[0] == task;
-				});
+		async load() {
+			try {
+				this.summary = await fetchSummary(this.$route.params.id);
+			} catch (err) {
+				this.error = err.message;
 			}
-		},
-		drawingURL: function(id) {
-			return `/api/drawings/${id}.png`;
-		},
-		loadTasks: function() {
-			this.$http.get("/api/game/" + this.$route.params.id + "/tasks")
-				.then( function(res) {
-					this.tasks = res.data.tasks;
-					this.$store.commit("SET_PLAYERS", res.data.players);
-			}.bind(this))
-			.catch(function(err) {
-				console.log("ERROR", err);
-			});
 		}
 	}
 };
 </script>
-

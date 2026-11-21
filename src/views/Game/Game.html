@@ -3,22 +3,25 @@
         <div class='speak-up'>
             <div v-if="currentTask.type == 'drawing'" class='bubble bubble-dark'>
                 🎨 Draw This<br/>
-                "{{ currentTask.prompt }}"
+                "{{ currentTask.promptText }}"
             </div>
             <div v-if="currentTask.type == 'start'" class='bubble bubble-dark'>
-                ✏️ Write Any Phrase 
+                ✏️ Write Any Phrase
             </div>
             <div v-if="currentTask.type == 'caption'" class='bubble bubble-dark'>
                 💬 Caption This
             </div>
         </div>
-
+        <p v-if="queued > 0" class="queue-count">
+            {{ queued }} more {{ queued == 1 ? 'task' : 'tasks' }} waiting after this one
+        </p>
         <template v-if="currentTask.type == 'drawing'">
             <div class="header-tools">
                 <button class='brush-item'
                         v-on:click="setBrush(brush)"
                         v-bind:class="{ active: (activeBrush == brush)}"
-                        v-for="brush in brushes">
+                        v-for="brush in brushes"
+                        :key="brush.display">
                         <span class='brush-dot' v-bind:style="{ width: brush.display, height: brush.display }">
                     </span>
                 </button>
@@ -26,38 +29,40 @@
                     Undo
                 </button>
             </div>
-            <VueSignaturePad id="signature" 
+            <DrawPad id="signature"
+                    :key="taskKey"
                     height="90vw"
                     width="100%"
-                    :onEnd="onEnd"
                     :options="options"
                     ref="signaturePad">
-            </VueSignaturePad>
+            </DrawPad>
             <div class='palette-container'>
                 <button class='palette-item'
                     v-on:click="setColor(color)"
                     v-bind:class="{ active: activeColor == color }"
                     v-bind:style="{ background: color }"
-                    v-for="color in colors">
+                    v-for="color in colors"
+                    :key="color">
                 </button>
             </div>
         </template>
         <template v-else>
-            <input v-model="caption">
+            <input v-model="caption" maxlength="140" v-on:keyup.enter="submit()">
             <div class='img-container' v-if="currentTask.type == 'caption'">
-                <img v-bind:src="idToImage(currentTask.prompt)">
+                <img v-bind:src="currentTask.promptImage">
             </div>
         </template>
-        <button class='btn btn-primary' v-on:click="submit()">
-            Submit
+        <p v-if="error" class="error">{{ error }}</p>
+        <button class='btn btn-primary' v-bind:disabled="submitting" v-on:click="submit()">
+            {{ submitting ? 'Sending…' : 'Submit' }}
         </button>
     </div>
     <div class='limbo' v-if="currentTask == null || !gameMode">
         <div v-if="chatDrawing">
-            <VueSignaturePad id="signature2" 
-                height="70vw" 
+            <DrawPad id="signature2"
+                height="70vw"
                 width="70vw" ref="chatPad">
-            </VueSignaturePad>
+            </DrawPad>
             <button id="sendButton" class='btn btn-primary'
                 v-on:click="sendChat()">Send</button>
             <button id="cancelChatButton" class='btn btn-secondary'
@@ -69,12 +74,13 @@
             </h3>
             <div class='speak-up' v-if="currentTask != null">
                 <div class='bubble bubble-dark'>
-                    💥 Alright! New task is here!
+                    💥 Alright! {{ tasks.length == 1 ? 'A new task is' : tasks.length + ' tasks are' }} waiting!
                 </div>
             </div>
             <button v-if="currentTask != null"
-                    class='btn btn-primary' 
+                    class='btn btn-primary'
                     v-on:click="startNext()"> Next Task</button>
+            <p class="progress-line">{{ progress.done }} / {{ progress.total }} steps done</p>
             <div>
                 <button class='btn btn-toggle'
                     v-bind:class="{ active: (chatMode == 1 )}"
@@ -88,27 +94,37 @@
                 </button>
             </div>
             <div v-show="chatMode == 1">
-                <button id="startChatButton" class='btn btn-secondary' 
+                <button id="startChatButton" class='btn btn-secondary'
                                 v-on:click="addChat()">
                                 New Chat
                 </button>
                 <div class="chatList">
-                    <div v-for="(chat, index) in myChats" 
+                    <div v-for="(chat, index) in myChats"
+                        :key="chat.at + chat.playerId"
                         v-bind:class="chatClass(index)"
                         class='speak-up'>
-                        <p>{{ authorName(chat.player) }}:</p>
+                        <p>{{ chat.name }}:</p>
                         <div class='bubble'>
-                            <img v-bind:src="idToImage(chat.drawing)">
+                            <img v-bind:src="chat.image">
                         </div>
                     </div>
                 </div>
             </div>
             <div v-show="chatMode == 2" class="player-list">
-                <div v-for="(player, index) in app_players">
-                    {{ player.name }}
-                    <span class="wiggle" v-if="player.taskCount && player.taskCount > 0">
-                    ✏️
+                <div v-for="player in players" :key="player.id" class="player-row">
+                    <span class="player-name">
+                        {{ player.name }}
+                        <span v-if="!player.connected" class="away">(away)</span>
                     </span>
+                    <span class="player-waiting">
+                        <span class="wiggle" v-if="player.waiting > 0">✏️</span>
+                        {{ player.waiting > 0 ? player.waiting + ' waiting' : 'done for now' }}
+                    </span>
+                    <button v-if="you && you.isHost && player.id != you.id && player.waiting > 0"
+                            class="skip-btn"
+                            v-on:click="skip(player)">
+                        Skip
+                    </button>
                 </div>
             </div>
         </div>
