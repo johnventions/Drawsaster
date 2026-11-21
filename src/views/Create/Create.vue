@@ -1,5 +1,4 @@
 <template src="./Create.html"></template>
-<style src="./Create.styl" lang="styl"></style>
 
 <script>
 import CookieService from "@/cookies.js";

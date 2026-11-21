@@ -4,7 +4,7 @@
         Game Code: {{ status().code }}
         <template v-if="players && players.length > 1">
             <br/>{{ players.length }} Players
-            <div v-for="player in players">
+            <div v-for="player in players" :key="player._id">
                 {{ player.name }}
             </div>
         </template>

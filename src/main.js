@@ -1,35 +1,27 @@
-import Vue from 'vue'
-import App from './App.vue'
-import router from './router'
-import authGuard from './authGuard'
-import VueSocketIO from 'vue-socket.io'
-import settings from "./settings";
-import store from './store'
-import Axios from "axios";
-import VueSignaturePad from './vendor/vue-signature-pad.esm';
+import { createApp } from 'vue';
+import axios from 'axios';
+import App from './App.vue';
+import router from './router';
+import authGuard from './authGuard';
+import store from './store';
+import settings from './settings';
+import { createSocket } from './socket';
+import DrawPad from './components/DrawPad.vue';
 
-Vue.use(VueSignaturePad);
-
-require('./styles/form.styl')
-require('./styles/bubbles.styl')
+import './styles/app.scss';
+import './styles/form.scss';
+import './styles/bubbles.scss';
 
 router.beforeEach(authGuard);
 
-Vue.prototype.$http = Axios;
-Vue.prototype.$settings = settings;
-Vue.config.productionTip = false;
+const app = createApp(App);
 
-var socketURL = window.location.origin;
-if (socketURL.indexOf("localhost") > -1) {
-	socketURL = "http://localhost:5050";
-}
+app.config.globalProperties.$http = axios;
+app.config.globalProperties.$settings = settings;
 
-Vue.use(new VueSocketIO({
-	debug: true,
-	connection: socketURL
-}))
+app.component('DrawPad', DrawPad);
 
-Vue.mixin({
+app.mixin({
 	computed: {
 		app_gamecode() {
 			return this.$store.state.code;
@@ -51,24 +43,23 @@ Vue.mixin({
 		}
 	},
 	methods: {
-		joinRoom: function(gameID, playerid) {
+		joinRoom(gameID, playerID) {
 			this.$socket.emit('Join', gameID);
-			this.$socket.emit('Join', playerid);
+			this.$socket.emit('Join', playerID);
 		},
-		getPlayersBegin: function () {
-			this.$http.get("/api/game/" + this.app_gameid + "/players")
+		getPlayersBegin() {
+			this.$http.get('/api/game/' + this.app_gameid + '/players')
 				.then(response => {
 					if (response.data.success) {
-						this.$store.commit("SET_PLAYERS", response.data.players);
-						this.$router.push("/game");
+						this.$store.commit('SET_PLAYERS', response.data.players);
+						this.$router.push('/game');
 					}
 				});
 		}
 	}
 });
 
-new Vue({
-	router,
-	store,
-	render: h => h(App)
-}).$mount('#app')
+app.use(router);
+app.use(store);
+app.use(createSocket());
+app.mount('#app');

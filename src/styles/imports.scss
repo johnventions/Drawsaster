@@ -1,0 +1,46 @@
+// Shared variables, injected into every SCSS file by vite.config.mjs.
+// Only variables, mixins and functions belong here: anything that outputs CSS
+// would be repeated in every component.
+@use 'sass:math';
+
+// LAYOUT ----------------------
+$base-size: 16; // base size for font and element sizes
+
+@function em($px) {
+	@return math.div($px, $base-size) * 1em;
+}
+
+// RESPONSIVE ----------------------
+// use EM because older iOS doesn't support REMs in media queries
+$phone-small-width: em(575);
+$phone-width: em(767);
+$tablet-width: em(768);
+$desktop-width: em(992);
+$desktop-large-width: em(1200);
+$desktop-xl-width: em(1440);
+$desktop-hd-width: em(1600);
+$desktop-xl-navigation: em(1860);
+
+$mobile-viewport: 320;
+
+// TYPOGRAPHY ----------------------
+$font-size-base: math.div($base-size, 16) * 100%;
+
+// MEDIA QUERIES ----------------------
+// use sparingly and ONLY for components that will require over-riding code for desktop
+$phone-small-down: 'screen and (max-width: #{$phone-small-width})';
+$phone-down: 'screen and (max-width: #{$phone-width})';
+$tablet-down: 'screen and (max-width: #{$desktop-width - 0.062em})';
+
+// main media queries, used as `@media #{$tablet-up} { ... }`
+$phone-small-up: 'screen and (min-width: #{$phone-small-width})';
+$phone-up: 'screen and (min-width: #{$phone-width})';
+$tablet-up: 'screen and (min-width: #{$tablet-width})';
+$desktop-up: 'screen and (min-width: #{$desktop-width})';
+$desktop-large-down: 'screen and (max-width: #{$desktop-large-width - 0.01em})';
+$desktop-large-up: 'screen and (min-width: #{$desktop-large-width})';
+$desktop-xl-up: 'screen and (min-width: #{$desktop-xl-width})';
+$desktop-hd-up: 'screen and (min-width: #{$desktop-hd-width})';
+
+$desktop-xl-screen: 'screen and (min-width: #{$desktop-large-width}) and (max-width: #{$desktop-xl-navigation})';
+$desktop-xl-screen-up: 'screen and (min-width: #{$desktop-xl-navigation})';

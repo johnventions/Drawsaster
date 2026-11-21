@@ -1,3 +1,3 @@
-module.exports = {
-    minPlayers: 3
-}
+export default {
+	minPlayers: 3
+};

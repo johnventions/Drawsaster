@@ -1,5 +1,5 @@
 <template src="./Game.html"></template>
-<style src="./Game.styl" lang="styl"></style>
+<style src="./Game.scss" lang="scss"></style>
 
 <script>
 export default {
@@ -55,7 +55,6 @@ export default {
 				maxWidth: 3,
 				minDistance: 5,
 				penColor: this.activeColor,
-				onEnd: this.onEnd,
 			}
 		},
 		mySubmissions() {
@@ -99,18 +98,9 @@ export default {
 			this.setColor("black");
 		},
 		undo() {
-			if (this.signaturePad()) {
-				const data = this.signaturePad().toData();
-				if (data) {
-					this.signaturePad().undo();
-				}
+			if (this.$refs.signaturePad) {
+				this.$refs.signaturePad.undo();
 			}
-		},
-		onEnd(data) {
-			
-		},
-		chatPad() {
-			return this.$refs['chatPad'] ? this.$refs['chatPad'].signaturePad : null;
 		},
 		authorName: function(id) {
 			var p = this.app_players.find( (x) => {
@@ -150,7 +140,7 @@ export default {
 			} else if (this.caption.trim() == '') {
 				return;
 			}
-			var data = this.currentTask.type == 'drawing' ? document.querySelector("#signature > canvas").toDataURL() : this.caption;
+			var data = this.currentTask.type == 'drawing' ? this.$refs.signaturePad.toDataURL() : this.caption;
 			var payload = {
 				taskID: this.currentTask._id,
 				content: data,
@@ -184,7 +174,7 @@ export default {
 			if (this.chatPad().isEmpty()) {
 				return;
 			}
-			var data = document.querySelector("#signature2 > canvas").toDataURL();
+			var data = this.$refs.chatPad.toDataURL();
 			var payload = {
 				player: this.app_userid,
 				content: data,

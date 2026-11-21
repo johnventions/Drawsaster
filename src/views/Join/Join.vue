@@ -1,5 +1,5 @@
 <template src="./Join.html"></template>
-<style src="./Join.styl" lang="styl" scoped></style>
+<style src="./Join.scss" lang="scss" scoped></style>
 
 <script>
 import CookieService from "@/cookies.js";

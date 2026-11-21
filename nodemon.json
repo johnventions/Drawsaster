@@ -2,5 +2,8 @@
     "watch": [
         "server",
         "server.js"
-    ]
+    ],
+    "env": {
+        "PORT": 5050
+    }
 }
