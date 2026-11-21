@@ -10,6 +10,11 @@ export function apiRoutes(service: GameService): express.Router {
 	const router = express.Router();
 	const inFlight = new Set<string>();
 
+	// for Docker health checks and deploy verification
+	router.get('/health', (req, res) => {
+		res.json({ ok: true, games: service.games.size });
+	});
+
 	/**
 	 * Submit one step. Drawings are raw PNG bodies; text steps are JSON { text }.
 	 * Safe to retry: a step the player already submitted returns 200 again.
