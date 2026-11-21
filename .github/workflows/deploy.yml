@@ -1,0 +1,87 @@
+name: CI and deploy
+
+# Pull requests: run the checks.
+# Pushes to master (and manual runs): checks, build the image, deploy to the droplet.
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/johnventions/drawsaster
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run lint
+      - run: npm run build
+
+  build:
+    needs: test
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    # one deploy at a time; a newer push waits instead of cancelling a deploy halfway
+    concurrency:
+      group: deploy-droplet
+      cancel-in-progress: false
+    env:
+      TARGET: deploy@${{ secrets.DEPLOY_HOST }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          install -d -m 700 ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          echo "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+
+      - name: Copy deploy files
+        run: scp deploy/compose.yml deploy/deploy.sh deploy/env.example "$TARGET:/opt/drawsaster/"
+
+      - name: Deploy
+        # the registry token goes over stdin so it never appears in a command line
+        run: |
+          ssh "$TARGET" "read -r GHCR_TOKEN; export GHCR_TOKEN; \
+            IMAGE='${{ env.IMAGE }}:${{ github.sha }}' GHCR_USER='${{ github.actor }}' \
+            bash /opt/drawsaster/deploy.sh" <<< "${{ secrets.GITHUB_TOKEN }}"

@@ -51,3 +51,29 @@ npm start          # serves dist/ and the API on $PORT
 | `FINISHED_GAME_MINUTES` | `60` | Finished games leave memory after this (summary stays in storage) |
 
 The S3 bucket should be private; the server hands out short-lived signed URLs. Add a lifecycle rule per prefix to expire old drawings (for example `dev/` after 1 day, `prod/` after 30 days).
+
+## Deploying to a droplet (Docker + GitHub Actions)
+`.github/workflows/deploy.yml` runs the checks on every pull request. On every push to `master` it also builds an image to `ghcr.io/johnventions/drawsaster` and deploys it over SSH.
+
+The droplet runs **one shared Caddy proxy** (`/opt/proxy`) on ports 80/443 for every project, with automatic HTTPS. Each project:
+- runs its containers on the external Docker network `web`, without publishing ports;
+- drops a site file in `/opt/proxy/sites/<project>.caddy` that maps its domain to its container;
+- reloads Caddy (`docker exec caddy caddy reload --config /etc/caddy/Caddyfile`).
+
+Drawsaster's `deploy/deploy.sh` does all three. Copy that pattern for other projects.
+
+### One-time setup
+1. Create an SSH key pair just for deploys (no passphrase).
+2. On the droplet, as root: `bash setup-droplet.sh "<deploy public key>"` (from `deploy/`). This creates the `deploy` user, the shared proxy, the `web` network, `/opt/drawsaster` and firewall rules.
+3. Add these repository secrets in GitHub:
+   - `DEPLOY_HOST`: the droplet IP;
+   - `DEPLOY_SSH_KEY`: the deploy private key;
+   - `DEPLOY_KNOWN_HOSTS`: the output of `ssh-keyscan -t ed25519 <droplet ip>`.
+4. Push to `master`, or run the workflow by hand.
+
+The first deploy creates `/opt/drawsaster/.env` from `deploy/env.example`. The app then serves on `http://<droplet ip>`.
+
+### Adding a domain
+Point an A record at the droplet, set `SITE_ADDRESS=yourdomain.com` in `/opt/drawsaster/.env`, and redeploy. Caddy gets the certificate automatically.
+
+Each deploy restarts the server, which ends games in progress.

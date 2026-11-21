@@ -1,0 +1,27 @@
+# Drawsaster on the droplet, in /opt/drawsaster (copied there by the deploy workflow).
+# Settings live in /opt/drawsaster/.env, which the workflow never overwrites.
+#
+# There are no public ports here: the shared Caddy proxy (/opt/proxy, see setup-droplet.sh)
+# reaches the app over the external "web" network as drawsaster-app:5050.
+name: drawsaster
+
+services:
+  app:
+    image: ${IMAGE:-ghcr.io/johnventions/drawsaster:latest}
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      PORT: "5050"
+    volumes:
+      - storage:/app/storage
+    networks:
+      web:
+        aliases:
+          - drawsaster-app
+
+volumes:
+  storage:
+
+networks:
+  web:
+    external: true
